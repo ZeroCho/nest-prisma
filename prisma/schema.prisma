@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id
+  nickname  String
+  image     String
+  password  String
+  Posts     Post[]
+  provider  String      @default("local")
+  snsId     String?
+  createdAt DateTime    @default(now())
+  Hearts    PostHeart[]
+  deletedAt DateTime?
+}
+
+model Post {
+  postId     Int         @id @default(autoincrement())
+  content    String
+  userId     String
+  User       User        @relation(fields: [userId], references: [id])
+  createdAt  DateTime    @default(now())
+  Images     PostImage[]
+  Hashtags   Hashtag[]
+  parentId   Int?
+  Parent     Post?       @relation("comment", fields: [parentId], references: [postId])
+  Comments   Post[]      @relation("comment")
+  originalId Int?
+  Original   Post?       @relation("retweet", fields: [originalId], references: [postId])
+  Retweets   Post[]      @relation("retweet")
+  Hearts     PostHeart[]
+  deletedAt  DateTime?
+}
+
+model PostHeart {
+  userId    String
+  postId    Int
+  User      User     @relation(references: [id], fields: [userId])
+  Post      Post     @relation(references: [postId], fields: [postId])
+  createdAt DateTime @default(now())
+
+  @@id([postId, userId])
+}
+
+model PostImage {
+  imageId   Int      @id @default(autoincrement())
+  link      String
+  createdAt DateTime @default(now())
+  postId    Int
+  Post      Post     @relation(fields: [postId], references: [postId])
+}
+
+model Hashtag {
+  title     String   @id
+  createdAt DateTime @default(now())
+  Post      Post[]
+}

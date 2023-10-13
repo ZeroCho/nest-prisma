@@ -1,0 +1,98 @@
+# nest 시작하기
+```
+nest new nest-prisma
+```
+
+# prisma 시작하기
+```
+npm install prisma typescript ts-node @types/node --save-dev 
+npx prisma init 
+npm install @prisma/client
+```
+prisma/schema.prisma와 .env 수정
+```
+npx prisma format
+npx prisma generate
+npx prisma migrate dev
+```
+
+## 초기 데이터 넣기
+- prisma/seed.ts 작성
+- package.json prisma 필드 추가
+```
+npx prisma db seed
+```
+
+## 스키마가 바뀔 때마다 클라이언트 재생성 및 마이그레이션 하기
+
+개발 중일 때는
+```
+npx prisma generate
+npx prisma migrate dev
+```
+
+실제로 배포한 서버에서는
+```
+npx prisma generate
+npx prisma migrate deploy
+```
+
+[(참고)기존 프로젝트를 prisma로 전환하려면](https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project)
+
+# 서비스 개발하기
+## ConfigService
+```
+npm i @nestjs/config
+```
+ConfigModule을 app.module.ts에 import
+- isGlobal: true면 모든 곳에서 ConfigService inject 가능
+## 미들웨어 넣기
+```
+npm i express-session passport cors redis connect-redis
+npm i -D @types/express-session @types/cors @types/passport
+```
+app.module.ts에 configure
+
+### redis 설치
+windows는 memurai, 그 외는 redis 설치
+```
+brew install redis
+```
+## REST API 개발
+```
+nest g res users posts
+
+```
+RouterModule로 등록하기
+[글로벌로 등록도 가능](https://docs.nestjs.com/faq/global-prefix)
+
+## 로그인
+```
+npm i @nestjs/passport bcrypt passport-local
+npm i -D @types/bcrypt @types/passport-local
+```
+
+### SNS 로그인
+### JWT 토큰 로그인
+
+## 밸리데이션
+```
+npm i class-validator class-transformer
+```
+
+## 문서화
+```
+npm i @nestjs/swagger
+```
+
+# 웹소켓 개발
+```
+npm i @nestjs/websocket
+```
+
+# 배포
+## 프론트
+serve-static 모듈 세팅으로 프론트 서빙
+```
+npm i @nestjs/serve-static
+```
