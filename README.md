@@ -58,6 +58,10 @@ app.module.ts
     @Inject('PrismaService')
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
+  
+  method() {
+    this.prismaService.client.model.method(...)
+  }
 ```
 # 서비스 개발하기
 ## ConfigService

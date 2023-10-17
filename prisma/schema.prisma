@@ -35,8 +35,8 @@ model Post {
   Parent     Post?       @relation("comment", fields: [parentId], references: [postId])
   Comments   Post[]      @relation("comment")
   originalId Int?
-  Original   Post?       @relation("retweet", fields: [originalId], references: [postId])
-  Retweets   Post[]      @relation("retweet")
+  Original   Post?       @relation("repost", fields: [originalId], references: [postId])
+  Reposts    Post[]      @relation("repost")
   Hearts     PostHeart[]
   deletedAt  DateTime?
 }

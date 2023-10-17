@@ -54,6 +54,39 @@ export const extendedPrismaClient = prismaClient.$extends({
         return query(args);
       },
     },
+    post: {
+      findUnique({ query, args }) {
+        args.where.deletedAt = null;
+        return prismaClient.post.findFirst(args);
+      },
+      findFirst({ args, query }) {
+        args.where.deletedAt = null;
+        return query(args);
+      },
+      findMany({ args, query }) {
+        if (args.where) {
+          if (args.where.deletedAt == undefined) {
+            // Exclude deleted records if they have not been explicitly requested
+            args.where.deletedAt = null;
+          }
+        } else {
+          args.where = { deletedAt: null };
+        }
+        return query(args);
+      },
+      update({ query, args }) {
+        args.where.deletedAt = null;
+        return query(args);
+      },
+      updateMany({ query, args }) {
+        if (args.where !== undefined) {
+          args.where.deletedAt = null;
+        } else {
+          args.where = { deletedAt: null };
+        }
+        return query(args);
+      },
+    },
   },
 });
 

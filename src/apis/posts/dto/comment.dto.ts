@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreatePostDto {
+export class CommentDto {
   @ApiProperty({
     description: '컨텐츠',
   })
