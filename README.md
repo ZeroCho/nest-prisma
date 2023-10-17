@@ -124,7 +124,7 @@ npm i @nestjs/swagger
 
 # 웹소켓 개발(Socket.io)
 ```
-npm i @nestjs/websocket
+npm i @nestjs/websockets @nestjs/platform-socket.io
 ```
 
 - namespace와 room으로 구성됨
