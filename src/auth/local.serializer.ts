@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { PassportSerializer } from '@nestjs/passport';
-import { PrismaService } from '../prisma.service';
+import { CustomPrismaService } from 'nestjs-prisma';
 import { User } from '.prisma/client';
+import { ExtendedPrismaClient } from '../prisma.extension';
 
 @Injectable()
 export class LocalSerializer extends PassportSerializer {
-  constructor(private prismaService: PrismaService) {
+  constructor(
+    @Inject('PrismaService')
+    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+  ) {
     super();
   }
 
@@ -14,7 +18,7 @@ export class LocalSerializer extends PassportSerializer {
   }
 
   async deserializeUser(id: string, done: CallableFunction) {
-    return await this.prismaService.user
+    return await this.prismaService.client.user
       .findFirst({
         select: {
           id: true,

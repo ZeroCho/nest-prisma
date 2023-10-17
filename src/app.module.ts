@@ -6,7 +6,7 @@ import * as cors from 'cors';
 import * as passport from 'passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { REDIS } from './redis/redis.constants';
-import { PrismaModule } from './prisma.module';
+import { CustomPrismaModule } from 'nestjs-prisma';
 import { RedisModule } from './redis/redis.module';
 import { RedisClientType } from 'redis';
 import RedisStore from 'connect-redis';
@@ -14,13 +14,19 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { RouterModule } from '@nestjs/core';
 import { ApiModule } from './apis/api.module';
+import { extendedPrismaClient } from './prisma.extension';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule,
+    CustomPrismaModule.forRootAsync({
+      name: 'PrismaService',
+      useFactory: () => {
+        return extendedPrismaClient;
+      },
+    }),
     RedisModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),

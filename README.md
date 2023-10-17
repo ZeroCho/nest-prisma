@@ -7,7 +7,7 @@ nest new nest-prisma
 ```
 npm install prisma typescript ts-node @types/node --save-dev 
 npx prisma init 
-npm install @prisma/client
+npm install @prisma/client nestjs-prisma
 ```
 prisma/schema.prisma와 .env 수정
 ```
@@ -39,6 +39,26 @@ npx prisma migrate deploy
 
 [(참고)기존 프로젝트를 prisma로 전환하려면](https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project)
 
+## Prisma Extension
+src/prisma.extension.ts 작성
+
+app.module.ts
+```
+    CustomPrismaModule.forRootAsync({
+      name: 'PrismaService',
+      useFactory: () => {
+        return extendedPrismaClient;
+      },
+    }),
+```
+
+앞으로 사용할 때
+```
+  constructor(
+    @Inject('PrismaService')
+    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+  ) {}
+```
 # 서비스 개발하기
 ## ConfigService
 ```

@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from '../../prisma.service';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from '../../prisma.extension';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @Inject('PrismaService')
+    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+  ) {}
 
   create(createUserDto: CreateUserDto) {
     return 'This action adds a new user';
@@ -16,7 +20,7 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.prismaService.user.findUnique({
+    return this.prismaService.client.user.findUnique({
       where: {
         id,
       },
