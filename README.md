@@ -5,8 +5,8 @@ nest new nest-prisma
 
 # prisma 시작하기
 ```
-npm install prisma typescript ts-node @types/node --save-dev 
-npx prisma init 
+npm install prisma typescript ts-node @types/node --save-dev
+npx prisma init
 npm install @prisma/client nestjs-prisma
 ```
 prisma/schema.prisma와 .env 수정
@@ -84,11 +84,28 @@ brew install redis
 ```
 ## REST API 개발
 ```
-nest g res users posts
-
+nest g res users
+nest g res posts
+nest g res hashtags
 ```
 RouterModule로 등록하기
 [글로벌로 등록도 가능](https://docs.nestjs.com/faq/global-prefix)
+```
+    RouterModule.register([
+      {
+        path: 'api',
+        module: ApiModule,
+      },
+    ]),
+```
+
+## 폼 만들기
+DTO 작성 - 요청, 응답
+
+### 밸리데이션
+```
+npm i class-validator class-transformer
+```
 
 ## 로그인
 ```
@@ -98,11 +115,6 @@ npm i -D @types/bcrypt @types/passport-local
 
 ### SNS 로그인
 ### JWT 토큰 로그인
-
-## 밸리데이션
-```
-npm i class-validator class-transformer
-```
 
 ## 문서화
 ```
