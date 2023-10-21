@@ -142,4 +142,29 @@ export class PostsService {
       },
     });
   }
+
+  getImage(postId: number, imageId: number, user: User) {
+    return this.prismaService.client.postImage.findUnique({
+      select: {
+        Post: {
+          select: {
+            User: {
+              select: {
+                image: true,
+                id: true,
+                nickname: true,
+              }
+            },
+            content: true,
+            createdAt: true,
+            postId: true,
+          },
+        }
+      },
+      where: {
+        imageId,
+        postId,
+      }
+    })
+  }
 }

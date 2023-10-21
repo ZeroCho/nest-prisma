@@ -130,4 +130,19 @@ export class PostsController {
   ) {
     return this.postsService.comment(commentDto, +postId, user);
   }
+
+  @Get(':id/images/:imageId')
+  @ApiOperation({
+    summary: '이미지 조회',
+  })
+  @ApiOkResponse({
+    type: ImageEntity,
+  })
+  getImage(
+    @User() user,
+    @Param('id') postId: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.postsService.getImage(+postId, +imageId, user);
+  }
 }
