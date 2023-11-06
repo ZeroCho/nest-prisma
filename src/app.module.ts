@@ -16,6 +16,11 @@ import { RouterModule } from '@nestjs/core';
 import { ApiModule } from './apis/api.module';
 import { extendedPrismaClient } from './prisma.extension';
 
+const obj = {
+  name: 'zerocho',
+  age: 29,
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({

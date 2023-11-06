@@ -1,0 +1,3 @@
+interface meal {
+  menu: string;
+}

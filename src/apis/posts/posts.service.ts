@@ -31,6 +31,7 @@ export class PostsService {
       },
       include: {
         Reposts: true,
+        Images: true,
       },
       take: 10,
     });
@@ -47,6 +48,7 @@ export class PostsService {
       },
       include: {
         Reposts: true,
+        Images: true,
       },
       take: 10,
     });
@@ -61,6 +63,7 @@ export class PostsService {
       },
       include: {
         Reposts: true,
+        Images: true,
       },
       take: 10,
     });
@@ -70,7 +73,7 @@ export class PostsService {
     return this.prismaService.client.post.findUnique({
       where: { postId: id },
       include: {
-        Comments: true,
+        Images: true,
       },
     });
   }
@@ -130,16 +133,33 @@ export class PostsService {
         userId: user.id,
         originalId: postId,
       },
+      include: {
+        Images: true,
+      }
     });
   }
 
-  async comment(commentDto: CommentDto, postId: number, user: User) {
+  async getComments(postId: number) {
+    return this.prismaService.client.post.findMany({
+      where: {
+        parentId: postId,
+      },
+      include: {
+        Images: true,
+      }
+    });
+  }
+
+  async addComment(commentDto: CommentDto, postId: number, user: User) {
     return this.prismaService.client.post.create({
       data: {
         ...commentDto,
         userId: user.id,
         parentId: postId,
       },
+      include: {
+        Images: true,
+      }
     });
   }
 

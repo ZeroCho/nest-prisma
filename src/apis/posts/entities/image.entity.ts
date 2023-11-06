@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Post } from './post.entity';
 import { User } from 'src/apis/users/entities/user.entity';
-import {Image} from "./image.entity";
 
-export class Post {
+export class Image {
   @ApiProperty({
     description: '아이디',
   })
-  postId: number;
+  imageId: number;
 
   @ApiProperty({
-    description: '게시글',
+    description: '링크',
   })
-  content: string;
+  link: string;
 
   @ApiProperty({
     description: '작성자 아이디',
@@ -29,13 +29,17 @@ export class Post {
   deletedAt?: Date;
 
   @ApiProperty({
+    description: '게시글 아이디',
+  })
+  postId: string;
+
+  @ApiProperty({
+    description: '게시글'
+  })
+  Post?: Post;
+
+  @ApiProperty({
     description: '작성자'
   })
   User?: User;
-
-  @ApiProperty({
-    description: '이미지 배열',
-    isArray: true,
-  })
-  Images: Image[];
 }

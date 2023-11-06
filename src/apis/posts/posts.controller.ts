@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
 import { User } from '../../common/decorators/user.decorator';
 import { CommentDto } from './dto/comment.dto';
 import { ApiBody, ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 import { Post as PostEntity } from './entities/post.entity';
+import { Image as ImageEntity } from './entities/image.entity';
 
 @Controller('posts')
 export class PostsController {
@@ -113,6 +113,20 @@ export class PostsController {
     return this.postsService.repost(+postId, user);
   }
 
+  @Get(':id/comments')
+  @ApiOperation({
+    summary: '댓글 조회',
+  })
+  @ApiOkResponse({
+    type: PostEntity,
+    isArray: true,
+  })
+  comment(
+    @Param('id') postId: string,
+  ) {
+    return this.postsService.getComments(+postId);
+  }
+
   @Post(':id/comment')
   @ApiOperation({
     summary: '댓글 달기',
@@ -123,15 +137,15 @@ export class PostsController {
   @ApiBody({
     type: CommentDto,
   })
-  comment(
+  addComment(
     @User() user,
     @Param('id') postId: string,
     @Body() commentDto: CommentDto,
   ) {
-    return this.postsService.comment(commentDto, +postId, user);
+    return this.postsService.addComment(commentDto, +postId, user);
   }
 
-  @Get(':id/images/:imageId')
+  @Get(':id/photo/:imageId')
   @ApiOperation({
     summary: '이미지 조회',
   })

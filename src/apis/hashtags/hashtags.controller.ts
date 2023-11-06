@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { HashtagsService } from './hashtags.service';
 import { CreateHashtagDto } from './dto/create-hashtag.dto';
 import { UpdateHashtagDto } from './dto/update-hashtag.dto';
+import {ApiOkResponse, ApiOperation} from "@nestjs/swagger";
 
 @Controller('hashtags')
 export class HashtagsController {
@@ -15,6 +16,15 @@ export class HashtagsController {
   @Get()
   findAll() {
     return this.hashtagsService.findAll();
+  }
+
+  @ApiOperation({ summary: '현재 트렌드 조회' })
+  @Get('trends')
+  @ApiOkResponse({
+    description: '10개',
+  })
+  getTrends() {
+    return this.hashtagsService.getTrends();
   }
 
   @Get(':id')
