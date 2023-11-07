@@ -4,10 +4,29 @@ import { UsersModule } from './users/users.module';
 import { PostsModule } from './posts/posts.module';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
+import { RouterModule } from '@nestjs/core';
 
 @Module({
   controllers: [ApiController],
   providers: [ApiService],
-  imports: [HashtagsModule, UsersModule, PostsModule],
+  imports: [
+    HashtagsModule,
+    UsersModule,
+    PostsModule,
+    RouterModule.register([
+      {
+        path: 'api',
+        module: HashtagsModule,
+      },
+      {
+        path: 'api',
+        module: UsersModule,
+      },
+      {
+        path: 'api',
+        module: PostsModule,
+      },
+    ]),
+  ],
 })
 export class ApiModule {}

@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-
-export class CreateUserDto {
+export class LoginResponseDto {
   @ApiProperty({
     description: '아이디',
   })
@@ -15,8 +14,8 @@ export class CreateUserDto {
   nickname: string;
 
   @ApiProperty({
-    description: '비밀번호',
+    description: '이미지 주소',
   })
   @IsString()
-  password: string;
+  image: string;
 }

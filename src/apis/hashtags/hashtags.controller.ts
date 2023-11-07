@@ -1,18 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { HashtagsService } from './hashtags.service';
 import { CreateHashtagDto } from './dto/create-hashtag.dto';
 import { UpdateHashtagDto } from './dto/update-hashtag.dto';
-import {ApiOkResponse, ApiOperation} from "@nestjs/swagger";
+import {
+  ApiExcludeEndpoint,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('해시태그 관련')
 @Controller('hashtags')
 export class HashtagsController {
   constructor(private readonly hashtagsService: HashtagsService) {}
 
+  @ApiExcludeEndpoint()
   @Post()
   create(@Body() createHashtagDto: CreateHashtagDto) {
     return this.hashtagsService.create(createHashtagDto);
   }
 
+  @ApiExcludeEndpoint()
   @Get()
   findAll() {
     return this.hashtagsService.findAll();
@@ -27,16 +43,19 @@ export class HashtagsController {
     return this.hashtagsService.getTrends();
   }
 
+  @ApiExcludeEndpoint()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.hashtagsService.findOne(+id);
   }
 
+  @ApiExcludeEndpoint()
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateHashtagDto: UpdateHashtagDto) {
     return this.hashtagsService.update(+id, updateHashtagDto);
   }
 
+  @ApiExcludeEndpoint()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.hashtagsService.remove(+id);

@@ -135,7 +135,7 @@ export class PostsService {
       },
       include: {
         Images: true,
-      }
+      },
     });
   }
 
@@ -146,7 +146,7 @@ export class PostsService {
       },
       include: {
         Images: true,
-      }
+      },
     });
   }
 
@@ -159,7 +159,7 @@ export class PostsService {
       },
       include: {
         Images: true,
-      }
+      },
     });
   }
 
@@ -173,18 +173,18 @@ export class PostsService {
                 image: true,
                 id: true,
                 nickname: true,
-              }
+              },
             },
             content: true,
             createdAt: true,
             postId: true,
           },
-        }
+        },
       },
       where: {
         imageId,
         postId,
-      }
-    })
+      },
+    });
   }
 }

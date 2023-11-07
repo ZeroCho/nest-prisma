@@ -15,14 +15,20 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { RouterModule } from '@nestjs/core';
 import { ApiModule } from './apis/api.module';
 import { extendedPrismaClient } from './prisma.extension';
-
-const obj = {
-  name: 'zerocho',
-  age: 29,
-}
+import { AuthModule } from './auth/auth.module';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
+    LoggerModule.forRoot({
+      pinoHttp: {
+        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' }
+            : undefined,
+      },
+    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -36,6 +42,8 @@ const obj = {
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
     }),
+    ApiModule,
+    AuthModule,
     RouterModule.register([
       {
         path: 'api',
