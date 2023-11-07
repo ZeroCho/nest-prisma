@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { HashtagsService } from './hashtags.service';
 import { CreateHashtagDto } from './dto/create-hashtag.dto';
@@ -16,6 +17,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { LoggedInGuard } from '../../auth/logged-in-guard';
 
 @ApiTags('해시태그 관련')
 @Controller('hashtags')
@@ -39,6 +41,7 @@ export class HashtagsController {
   @ApiOkResponse({
     description: '10개',
   })
+  @UseGuards(LoggedInGuard)
   getTrends() {
     return this.hashtagsService.getTrends();
   }

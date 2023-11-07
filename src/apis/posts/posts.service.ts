@@ -13,16 +13,28 @@ export class PostsService {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  create(createPostDto: CreatePostDto, user: User) {
+  create(
+    createPostDto: CreatePostDto,
+    user: User,
+    files: Express.Multer.File[],
+  ) {
     return this.prismaService.client.post.create({
       data: {
         ...createPostDto,
         userId: user.id,
+        Images: {
+          createMany: {
+            data: files.map((v) => ({
+              link: v[0].path,
+            })),
+          },
+        },
       },
     });
   }
 
   findAll(cursor: number) {
+    // TODO: 추천, 팔로잉, 검색결과 구분
     const where = cursor ? { postId: { lt: cursor } } : {};
     return this.prismaService.client.post.findMany({
       where,
@@ -88,7 +100,13 @@ export class PostsService {
     });
   }
 
-  addHeart(postId: number, user: User) {
+  async addHeart(postId: number, user: User) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: { postId },
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
     return this.prismaService.client.post.update({
       where: { postId },
       data: {
@@ -104,7 +122,13 @@ export class PostsService {
     });
   }
 
-  removeHeart(postId: number, user: User) {
+  async removeHeart(postId: number, user: User) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: { postId },
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
     return this.prismaService.client.post.update({
       where: { postId },
       data: {
@@ -140,6 +164,12 @@ export class PostsService {
   }
 
   async getComments(postId: number) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: { postId },
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
     return this.prismaService.client.post.findMany({
       where: {
         parentId: postId,
@@ -151,6 +181,12 @@ export class PostsService {
   }
 
   async addComment(commentDto: CommentDto, postId: number, user: User) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: { postId },
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
     return this.prismaService.client.post.create({
       data: {
         ...commentDto,
@@ -163,7 +199,13 @@ export class PostsService {
     });
   }
 
-  getImage(postId: number, imageId: number, user: User) {
+  async getImage(postId: number, imageId: number, user: User) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: { postId },
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
     return this.prismaService.client.postImage.findUnique({
       select: {
         Post: {

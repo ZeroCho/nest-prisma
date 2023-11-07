@@ -3,18 +3,31 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFiles,
+  UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { User } from '../../common/decorators/user.decorator';
 import { CommentDto } from './dto/comment.dto';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Post as PostEntity } from './entities/post.entity';
 import { Image as ImageEntity } from './entities/image.entity';
+import { User as UserEntity } from '../users/entities/user.entity';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { LoggedInGuard } from '../../auth/logged-in-guard';
+import { NotFoundError } from 'rxjs';
 
 @ApiTags('게시글 관련')
 @Controller('posts')
@@ -30,9 +43,14 @@ export class PostsController {
   @ApiOkResponse({
     type: PostEntity,
   })
+  @UseInterceptors(FilesInterceptor('images'))
   @Post()
-  create(@Body() createPostDto: CreatePostDto, @User() user) {
-    return this.postsService.create(createPostDto, user);
+  create(
+    @Body() createPostDto: CreatePostDto,
+    @User() user: UserEntity,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.postsService.create(createPostDto, user, files);
   }
 
   @ApiOperation({
@@ -54,6 +72,7 @@ export class PostsController {
     type: PostEntity,
     isArray: true,
   })
+  @UseGuards(LoggedInGuard)
   @Get('followings')
   findFollowing(@Query('cursor') cursor: string) {
     return this.postsService.findAll(+cursor);
@@ -66,6 +85,7 @@ export class PostsController {
     type: PostEntity,
     isArray: true,
   })
+  @UseGuards(LoggedInGuard)
   @Get('')
   getSearchResult(@Query('cursor') cursor: string, @Query('q') q: string) {
     return this.postsService.getSearchResult(q, +cursor);
@@ -73,6 +93,9 @@ export class PostsController {
 
   @ApiOperation({
     summary: '게시글 하나 조회',
+  })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
   })
   @Get(':id')
   findOne(@Param('id') id: string) {
@@ -82,22 +105,34 @@ export class PostsController {
   @ApiOperation({
     summary: '하트 제거',
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Delete(':id/heart')
-  removeHeart(@User() user, @Param('id') postId: string) {
+  removeHeart(@User() user: UserEntity, @Param('id') postId: string) {
     return this.postsService.removeHeart(+postId, user);
   }
 
   @ApiOperation({
     summary: '하트 달기',
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Post(':id/heart')
-  addHeart(@User() user, @Param('id') postId: string) {
+  addHeart(@User() user: UserEntity, @Param('id') postId: string) {
     return this.postsService.addHeart(+postId, user);
   }
 
   @ApiOperation({
     summary: '게시글 제거',
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.postsService.remove(+id);
@@ -109,9 +144,17 @@ export class PostsController {
   @ApiOkResponse({
     type: PostEntity,
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Post(':id/repost')
-  repost(@User() user, @Param('id') postId: string) {
-    return this.postsService.repost(+postId, user);
+  async repost(@User() user: UserEntity, @Param('id') postId: string) {
+    const result = await this.postsService.repost(+postId, user);
+    if (result === 'no_such_post') {
+      throw new NotFoundException('no_such_post');
+    }
+    return result;
   }
 
   @ApiOperation({
@@ -121,6 +164,10 @@ export class PostsController {
     type: PostEntity,
     isArray: true,
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Get(':id/comments')
   comment(@Param('id') postId: string) {
     return this.postsService.getComments(+postId);
@@ -135,6 +182,10 @@ export class PostsController {
   @ApiBody({
     type: CommentDto,
   })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
   @Post(':id/comment')
   addComment(
     @User() user,
@@ -149,6 +200,9 @@ export class PostsController {
   })
   @ApiOkResponse({
     type: ImageEntity,
+  })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
   })
   @Get(':id/photos/:imageId')
   getImage(

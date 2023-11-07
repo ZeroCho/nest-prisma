@@ -96,7 +96,7 @@ export class UsersController {
   @ApiOperation({ summary: '특정인 정보' })
   @ApiOkResponse({
     description: '유저 정보',
-    type: User,
+    type: SignupResponseDto,
   })
   @Get(':id')
   findOne(@Param('id') id: string) {
