@@ -11,16 +11,18 @@ datasource db {
 }
 
 model User {
-  id        String      @id
-  nickname  String
-  image     String
-  password  String
-  Posts     Post[]
-  provider  String      @default("local")
-  snsId     String?
-  createdAt DateTime    @default(now())
-  Hearts    PostHeart[]
-  deletedAt DateTime?
+  id         String      @id
+  nickname   String
+  image      String
+  password   String
+  Posts      Post[]
+  provider   String      @default("local")
+  snsId      String?
+  createdAt  DateTime    @default(now())
+  Hearts     PostHeart[]
+  deletedAt  DateTime?
+  Followers  User[]      @relation("Follow")
+  Followings User[]      @relation("Follow")
 }
 
 model Post {
@@ -62,5 +64,5 @@ model PostImage {
 model Hashtag {
   title     String   @id
   createdAt DateTime @default(now())
-  Post      Post[]
+  Posts     Post[]
 }

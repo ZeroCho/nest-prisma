@@ -40,6 +40,9 @@ import { LoggerModule } from 'nestjs-pino';
     }),
     RedisModule,
     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'upload'),
+    }),
+    ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
     }),
     ApiModule,

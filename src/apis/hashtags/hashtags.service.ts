@@ -23,6 +23,11 @@ export class HashtagsService {
     // TODO: 해시태그 제일 많은 10개, 타이틀과 Count return하기
     return this.prismaService.client.hashtag.findMany({
       take: 10,
+      orderBy: {
+        Posts: {
+          _count: 'desc',
+        }
+      }
     });
   }
 

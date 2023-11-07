@@ -87,6 +87,19 @@ export class UsersController {
     return result;
   }
 
+  @ApiOperation({
+    summary: '팔로우 추천인',
+  })
+  @ApiOkResponse({
+    description: '3명',
+    isArray: true,
+    type: User,
+  })
+  @Get('followRecommends')
+  getFollowRecommends() {
+    return this.usersService.getFollowRecommends();
+  }
+
   @ApiExcludeEndpoint()
   @Get()
   findAll() {
@@ -114,19 +127,6 @@ export class UsersController {
   @Get(':id/posts')
   findUserPosts(@Param('id') userId: string, @Query('cursor') cursor: number) {
     return this.postsService.findUserPosts(userId, cursor);
-  }
-
-  @ApiOperation({
-    summary: '팔로우 추천인',
-  })
-  @ApiOkResponse({
-    description: '3명',
-    isArray: true,
-    type: User,
-  })
-  @Get('followRecommends')
-  getFollowRecommends() {
-    return this.usersService.getFollowRecommends();
   }
 
   @ApiExcludeEndpoint()

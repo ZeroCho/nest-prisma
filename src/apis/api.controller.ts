@@ -47,8 +47,13 @@ export class ApiController {
   @UseGuards(NotLoggedInGuard)
   @HttpCode(200)
   @Post('login')
-  login() {
-    return this.apiService.login();
+  login(@User() user: UserEntity) {
+    console.log('login', user);
+    return {
+      id: user.id,
+      nickname: user.nickname,
+      image: user.image,
+    };
   }
 
   @ApiExcludeEndpoint()
