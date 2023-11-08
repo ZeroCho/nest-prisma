@@ -31,7 +31,7 @@ export class UsersService {
       data: {
         id: createUserDto.id,
         nickname: createUserDto.nickname,
-        image: `/${file.path}`,
+        image: `/${file.path.replaceAll('\\', '/')}`,
         password: await bcrypt.hash(createUserDto.password, 12),
       },
     });

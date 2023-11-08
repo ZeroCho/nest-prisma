@@ -5,7 +5,7 @@ import { CustomPrismaModule } from 'nestjs-prisma';
 import { extendedPrismaClient } from '../../prisma.extension';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import path from 'path';
+import * as path from 'path';
 
 @Module({
   imports: [

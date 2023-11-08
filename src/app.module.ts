@@ -2,7 +2,6 @@ import { Inject, MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import * as session from 'express-session';
-import * as cors from 'cors';
 import * as passport from 'passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { REDIS } from './redis/redis.constants';
@@ -17,6 +16,7 @@ import { ApiModule } from './apis/api.module';
 import { extendedPrismaClient } from './prisma.extension';
 import { AuthModule } from './auth/auth.module';
 import { LoggerModule } from 'nestjs-pino';
+import * as cookieParser from "cookie-parser";
 
 @Module({
   imports: [
@@ -68,6 +68,7 @@ export class AppModule {
       client: this.redis,
     });
     const middlewares = [
+      cookieParser(),
       session({
         store,
         resave: false,
@@ -80,9 +81,6 @@ export class AppModule {
       passport.initialize(),
       passport.session(),
     ];
-    if (process.env.NODE_ENV === 'beta') {
-      middlewares.unshift(cors());
-    }
     consumer.apply(...middlewares).forRoutes('*');
   }
 }

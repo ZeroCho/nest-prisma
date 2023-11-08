@@ -20,12 +20,13 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import {request, Request, Response} from 'express';
 import { LocalAuthGuard } from '../auth/local-auth.guard';
 import { LoginDto } from './dto/login.dto';
 import { LoginResponseDto } from './dto/login.response.dto';
 import { LoggedInGuard } from '../auth/logged-in-guard';
 import { NotLoggedInGuard } from '../auth/not-logged-in-guard';
+import {decode, getToken} from "next-auth/jwt";
 
 @Controller()
 export class ApiController {
@@ -92,5 +93,16 @@ export class ApiController {
   @Get('user')
   getMyInfo(@User() user: UserEntity) {
     return user || false;
+  }
+
+  @ApiOperation({
+    summary: 'next-auth 토큰 파싱',
+  })
+  @Post('decode')
+  async decode(@Req() req: Request) {
+    console.log(req.cookies['next-auth.session-token']);
+    const result = await getToken({ req, secret: 'mustkeepinsecret' });
+    console.log('result', result);
+    return result;
   }
 }

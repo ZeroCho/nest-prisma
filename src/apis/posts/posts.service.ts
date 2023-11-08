@@ -5,6 +5,7 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from '../../prisma.extension';
 import { User } from '../users/entities/user.entity';
 import { CommentDto } from './dto/comment.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
@@ -18,14 +19,22 @@ export class PostsService {
     user: User,
     files: Express.Multer.File[],
   ) {
+    console.log('files', files);
     return this.prismaService.client.post.create({
+      select: {
+        postId: true,
+        content: true,
+        createdAt: true,
+        User: true,
+        Images: true,
+      },
       data: {
         ...createPostDto,
         userId: user.id,
         Images: {
           createMany: {
             data: files.map((v) => ({
-              link: v[0].path,
+              link: '/' + v.path.replaceAll('\\', '/'),
             })),
           },
         },
@@ -33,17 +42,35 @@ export class PostsService {
     });
   }
 
-  findAll(cursor: number) {
-    // TODO: 추천, 팔로잉, 검색결과 구분
-    const where = cursor ? { postId: { lt: cursor } } : {};
+  findAll(cursor: number, type: 'followings' | 'recommends', user?: User) {
+    const where: Prisma.PostWhereInput = cursor ? { postId: { lt: cursor } } : {};
+    if (type === 'followings') {
+      where.User = {
+        Followers: {
+          some: {
+            id: user.id,
+          }
+        }
+      }
+    }
     return this.prismaService.client.post.findMany({
       where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
+      select: {
+        content: true,
+        postId: true,
+        createdAt: true,
         Reposts: true,
         Images: true,
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            image: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
       take: 10,
     });
@@ -58,9 +85,19 @@ export class PostsService {
       orderBy: {
         createdAt: 'desc',
       },
-      include: {
+      select: {
+        content: true,
+        postId: true,
+        createdAt: true,
         Reposts: true,
         Images: true,
+        User: {
+          select: {
+            id: true,
+            nickname: true,
+            image: true,
+          }
+        }
       },
       take: 10,
     });

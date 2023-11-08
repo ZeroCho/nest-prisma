@@ -16,7 +16,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { User } from '../../common/decorators/user.decorator';
 import { CommentDto } from './dto/comment.dto';
 import {
-  ApiBody,
+  ApiBody, ApiConsumes,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -37,8 +37,25 @@ export class PostsController {
   @ApiOperation({
     summary: '게시글 생성',
   })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
-    type: CreatePostDto,
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: '이미지 파일',
+        },
+        content: {
+          type: 'string',
+          description: '컨텐츠',
+        },
+      },
+    },
   })
   @ApiOkResponse({
     type: PostEntity,
@@ -62,7 +79,7 @@ export class PostsController {
   })
   @Get('recommends')
   findRecent(@Query('cursor') cursor: string) {
-    return this.postsService.findAll(+cursor);
+    return this.postsService.findAll(+cursor, 'recommends');
   }
 
   @ApiOperation({
@@ -74,8 +91,8 @@ export class PostsController {
   })
   @UseGuards(LoggedInGuard)
   @Get('followings')
-  findFollowing(@Query('cursor') cursor: string) {
-    return this.postsService.findAll(+cursor);
+  findFollowing(@Query('cursor') cursor: string, @User() user: UserEntity) {
+    return this.postsService.findAll(+cursor, 'followings', user);
   }
 
   @ApiOperation({
