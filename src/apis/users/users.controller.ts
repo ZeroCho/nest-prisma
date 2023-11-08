@@ -27,10 +27,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Post as PostEntity } from '../posts/entities/post.entity';
-import { User } from './entities/user.entity';
+import { User as UserEntity } from './entities/user.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SignupResponseDto } from './dto/signup.response.dto';
 import { NotLoggedInGuard } from '../../auth/not-logged-in-guard';
+import {User} from "../../common/decorators/user.decorator";
 
 @ApiTags('유저 관련')
 @Controller('users')
@@ -93,11 +94,11 @@ export class UsersController {
   @ApiOkResponse({
     description: '3명',
     isArray: true,
-    type: User,
+    type: UserEntity,
   })
   @Get('followRecommends')
-  getFollowRecommends() {
-    return this.usersService.getFollowRecommends();
+  getFollowRecommends(@User() user: UserEntity) {
+    return this.usersService.getFollowRecommends(user);
   }
 
   @ApiExcludeEndpoint()
@@ -139,5 +140,17 @@ export class UsersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
+  }
+
+  @ApiOperation({ summary: '팔로우' })
+  @Post(':id/follow')
+  follow(@Param('id') id: string, @User() user: UserEntity) {
+    return this.usersService.follow(id, user);
+  }
+
+  @ApiOperation({ summary: '언팔로우' })
+  @Delete(':id/follow')
+  unfollow(@Param('id') id: string, @User() user: UserEntity) {
+    return this.usersService.unfollow(id, user);
   }
 }

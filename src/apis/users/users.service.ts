@@ -4,6 +4,7 @@ import {UpdateUserDto} from './dto/update-user.dto';
 import {CustomPrismaService} from 'nestjs-prisma';
 import {ExtendedPrismaClient} from '../../prisma.extension';
 import * as bcrypt from 'bcrypt';
+import {User} from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
@@ -49,16 +50,60 @@ export class UsersService {
     });
   }
 
-  getFollowRecommends() {
+  getFollowRecommends(user?: User) {
+    console.log('user', user);
+    const where = user ? {
+      Followers: {
+        none: {
+          id: user.id,
+        }
+      },
+      id: {
+        not: user.id
+      }
+    } : {};
     return this.prismaService.client.user.findMany({
       skip: 0,
       take: 3,
+      where,
       orderBy: [{
         Followers: {
           _count: 'desc',
         },
       }]
     });
+  }
+
+  follow(id: string, user: User) {
+    if (id === user.id) {
+      throw 'self_impossible';
+    }
+    return this.prismaService.client.user.update({
+      where: { id },
+      data: {
+        Followers: {
+          connect: {
+            id: user.id,
+          }
+        }
+      }
+    })
+  }
+
+  unfollow(id: string, user: User) {
+    if (id === user.id) {
+      throw 'self_impossible';
+    }
+    return this.prismaService.client.user.update({
+      where: { id },
+      data: {
+        Followers: {
+          disconnect: {
+            id: user.id,
+          }
+        }
+      }
+    })
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {

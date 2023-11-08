@@ -19,16 +19,27 @@ export class HashtagsService {
     return `This action returns all hashtags`;
   }
 
-  getTrends() {
-    // TODO: 해시태그 제일 많은 10개, 타이틀과 Count return하기
-    return this.prismaService.client.hashtag.findMany({
+  async getTrends() {
+    const top10 = await this.prismaService.client.hashtag.findMany({
       take: 10,
+      include: {
+        _count: {
+          select: {
+            Posts: true,
+          },
+        },
+      },
       orderBy: {
         Posts: {
           _count: 'desc',
         }
       }
     });
+    console.log(top10);
+    return top10.map((v) => ({
+      title: v.title,
+      count: v._count.Posts,
+    }))
   }
 
   findOne(id: number) {

@@ -19,6 +19,7 @@ export class PostsService {
     user: User,
     files: Express.Multer.File[],
   ) {
+    const hashtags = createPostDto.content.match(/#[^\s#]+/g);
     console.log('files', files);
     return this.prismaService.client.post.create({
       select: {
@@ -38,6 +39,16 @@ export class PostsService {
             })),
           },
         },
+        Hashtags: {
+          connectOrCreate: hashtags.map((tag) => ({
+            where: {
+              title: tag,
+            },
+            create: {
+              title: tag,
+            },
+          }))
+        }
       },
     });
   }
