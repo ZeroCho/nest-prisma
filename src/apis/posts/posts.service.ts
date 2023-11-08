@@ -23,10 +23,16 @@ export class PostsService {
     console.log('files', files);
     return this.prismaService.client.post.create({
       select: {
-        postId: true,
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
         content: true,
         createdAt: true,
-        User: true,
+        postId: true,
         Images: true,
       },
       data: {
@@ -70,13 +76,19 @@ export class PostsService {
         content: true,
         postId: true,
         createdAt: true,
-        Reposts: true,
         Images: true,
         User: {
           select: {
             id: true,
             nickname: true,
             image: true,
+          }
+        },
+        _count: {
+          select: {
+            Reposts: true,
+            Comments: true,
+            Hearts: true,
           }
         }
       },
@@ -100,13 +112,19 @@ export class PostsService {
         content: true,
         postId: true,
         createdAt: true,
-        Reposts: true,
         Images: true,
         User: {
           select: {
             id: true,
             nickname: true,
             image: true,
+          }
+        },
+        _count: {
+          select: {
+            Reposts: true,
+            Comments: true,
+            Hearts: true,
           }
         }
       },
@@ -117,13 +135,29 @@ export class PostsService {
   findUserPosts(userId: string, cursor: number) {
     const where = cursor ? { userId, postId: { lt: cursor } } : { userId };
     return this.prismaService.client.post.findMany({
+      select: {
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
+        content: true,
+        createdAt: true,
+        postId: true,
+        Images: true,
+        _count: {
+          select: {
+            Reposts: true,
+            Comments: true,
+            Hearts: true,
+          }
+        }
+      },
       where,
       orderBy: {
         createdAt: 'desc',
-      },
-      include: {
-        Reposts: true,
-        Images: true,
       },
       take: 10,
     });
@@ -131,10 +165,27 @@ export class PostsService {
 
   findOne(id: number) {
     return this.prismaService.client.post.findUnique({
-      where: { postId: id },
-      include: {
+      select: {
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
+        content: true,
+        createdAt: true,
+        postId: true,
         Images: true,
+        _count: {
+          select: {
+            Reposts: true,
+            Comments: true,
+            Hearts: true,
+          }
+        }
       },
+      where: { postId: id },
     });
   }
 
@@ -200,13 +251,24 @@ export class PostsService {
       return 'no_such_post';
     }
     return this.prismaService.client.post.create({
+      select: {
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
+        Original: true,
+        content: true,
+        createdAt: true,
+        postId: true,
+        Images: true,
+      },
       data: {
         ...original,
         userId: user.id,
         originalId: postId,
-      },
-      include: {
-        Images: true,
       },
     });
   }
@@ -219,11 +281,29 @@ export class PostsService {
       return 'no_such_post';
     }
     return this.prismaService.client.post.findMany({
+      select: {
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
+        content: true,
+        createdAt: true,
+        postId: true,
+        Images: true,
+        Parent: true,
+        _count: {
+          select: {
+            Reposts: true,
+            Comments: true,
+            Hearts: true,
+          }
+        }
+      },
       where: {
         parentId: postId,
-      },
-      include: {
-        Images: true,
       },
     });
   }
@@ -236,13 +316,24 @@ export class PostsService {
       return 'no_such_post';
     }
     return this.prismaService.client.post.create({
+      select: {
+        User: {
+          select: {
+            image: true,
+            id: true,
+            nickname: true,
+          }
+        },
+        Parent: true,
+        content: true,
+        createdAt: true,
+        postId: true,
+        Images: true,
+      },
       data: {
         ...commentDto,
         userId: user.id,
         parentId: postId,
-      },
-      include: {
-        Images: true,
       },
     });
   }

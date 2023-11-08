@@ -143,14 +143,34 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: '팔로우' })
+  @ApiOkResponse({
+    description: '성공시 팔로우한 아이디 반환'
+  })
+  @ApiForbiddenResponse({
+    description: '자신은 팔로우 불가능(self_impossible)'
+  })
   @Post(':id/follow')
-  follow(@Param('id') id: string, @User() user: UserEntity) {
-    return this.usersService.follow(id, user);
+  async follow(@Param('id') id: string, @User() user: UserEntity) {
+    const result = await this.usersService.follow(id, user);
+    if (result === 'self_impossible') {
+      throw new ForbiddenException('self_impossible');
+    }
+    return result.id;
   }
 
   @ApiOperation({ summary: '언팔로우' })
+  @ApiOkResponse({
+    description: '성공시 언팔로우한 아이디 반환'
+  })
+  @ApiForbiddenResponse({
+    description: '자신은 팔로우 불가능(self_impossible)'
+  })
   @Delete(':id/follow')
-  unfollow(@Param('id') id: string, @User() user: UserEntity) {
-    return this.usersService.unfollow(id, user);
+  async unfollow(@Param('id') id: string, @User() user: UserEntity) {
+    const result = await this.usersService.unfollow(id, user);
+    if (result === 'self_impossible') {
+      throw new ForbiddenException('self_impossible');
+    }
+    return result.id;
   }
 }

@@ -76,7 +76,7 @@ export class UsersService {
 
   follow(id: string, user: User) {
     if (id === user.id) {
-      throw 'self_impossible';
+      return 'self_impossible';
     }
     return this.prismaService.client.user.update({
       where: { id },
@@ -92,7 +92,7 @@ export class UsersService {
 
   unfollow(id: string, user: User) {
     if (id === user.id) {
-      throw 'self_impossible';
+      return 'self_impossible';
     }
     return this.prismaService.client.user.update({
       where: { id },

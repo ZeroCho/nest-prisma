@@ -184,7 +184,6 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
-  @UseGuards(LoggedInGuard)
   @Get(':id/comments')
   comment(@Param('id') postId: string) {
     return this.postsService.getComments(+postId);
