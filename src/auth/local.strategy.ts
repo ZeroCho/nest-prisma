@@ -20,7 +20,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
 
   async validate(id: string, password: string) {
     console.log(id, password);
-    const user = await this.usersService.findOne(id);
+    const user = await this.usersService.findOneInner(id);
     if (user) {
       if (user.provider !== 'local') {
         throw new ForbiddenException({

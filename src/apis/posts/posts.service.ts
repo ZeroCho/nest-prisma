@@ -1,18 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from '../../prisma.extension';
-import { User } from '../users/entities/user.entity';
-import { CommentDto } from './dto/comment.dto';
-import { Prisma } from '@prisma/client';
+import {Inject, Injectable} from '@nestjs/common';
+import {CreatePostDto} from './dto/create-post.dto';
+import {UpdatePostDto} from './dto/update-post.dto';
+import {CustomPrismaService} from 'nestjs-prisma';
+import {ExtendedPrismaClient} from '../../prisma.extension';
+import {User} from '../users/entities/user.entity';
+import {CommentDto} from './dto/comment.dto';
+import {Prisma} from '@prisma/client';
 
 @Injectable()
 export class PostsService {
   constructor(
     @Inject('PrismaService')
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  ) {
+  }
 
   create(
     createPostDto: CreatePostDto,
@@ -60,7 +61,7 @@ export class PostsService {
   }
 
   findAll(cursor: number, type: 'followings' | 'recommends', user?: User) {
-    const where: Prisma.PostWhereInput = cursor ? { postId: { lt: cursor } } : {};
+    const where: Prisma.PostWhereInput = cursor ? {postId: {lt: cursor}} : {};
     if (type === 'followings') {
       where.User = {
         Followers: {
@@ -90,6 +91,30 @@ export class PostsService {
             Comments: true,
             Hearts: true,
           }
+        },
+        Hearts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
+        },
+        Reposts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
+        },
+        Comments: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
         }
       },
       orderBy: {
@@ -99,15 +124,30 @@ export class PostsService {
     });
   }
 
-  getSearchResult(q: string, cursor: number) {
-    const where = cursor
-      ? { postId: { lt: cursor }, content: { contains: q } }
-      : { content: { contains: q } };
+  getSearchResult(user: User, q: string, cursor: number, pf?: string, f?: string) {
+    const where: Prisma.PostWhereInput = cursor
+      ? {postId: {lt: cursor}, content: {contains: q}}
+      : {content: {contains: q}};
+    let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[] = [{
+      Hearts: {
+        _count: 'desc'
+      },
+    }, {
+      createdAt: 'desc',
+    }];
+    if (pf === 'on') {
+      where.User.Followers.some = {
+        id: user.id,
+      }
+    }
+    if (f === 'live') {
+      orderBy = {
+        createdAt: 'desc',
+      }
+    }
     return this.prismaService.client.post.findMany({
       where,
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy,
       select: {
         content: true,
         postId: true,
@@ -126,14 +166,38 @@ export class PostsService {
             Comments: true,
             Hearts: true,
           }
+        },
+        Hearts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
+        },
+        Reposts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
+        },
+        Comments: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
         }
       },
       take: 10,
     });
   }
 
-  findUserPosts(userId: string, cursor: number) {
-    const where = cursor ? { userId, postId: { lt: cursor } } : { userId };
+  findUserPosts(userId: string, cursor: number, user?: User) {
+    const where = cursor ? {userId, postId: {lt: cursor}} : {userId};
     return this.prismaService.client.post.findMany({
       select: {
         User: {
@@ -153,6 +217,30 @@ export class PostsService {
             Comments: true,
             Hearts: true,
           }
+        },
+        Hearts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
+        },
+        Reposts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
+        },
+        Comments: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
+          }
         }
       },
       where,
@@ -163,7 +251,7 @@ export class PostsService {
     });
   }
 
-  findOne(id: number) {
+  findOne(id: number, user: User) {
     return this.prismaService.client.post.findUnique({
       select: {
         User: {
@@ -183,9 +271,33 @@ export class PostsService {
             Comments: true,
             Hearts: true,
           }
+        },
+        Hearts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
+        },
+        Reposts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
+        },
+        Comments: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user.id,
+          }
         }
       },
-      where: { postId: id },
+      where: {postId: id},
     });
   }
 
@@ -195,26 +307,33 @@ export class PostsService {
 
   remove(id: number) {
     return this.prismaService.client.post.softDelete({
-      where: { postId: id },
+      where: {postId: id},
     });
   }
 
   async addHeart(postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';
     }
     return this.prismaService.client.post.update({
-      where: { postId },
+      where: {postId},
       data: {
         Hearts: {
-          connect: {
-            postId_userId: {
-              postId,
+          upsert: {
+            where: {
+              postId_userId: {
+                userId: user.id,
+                postId: postId,
+              }
+            },
+            create: {
+              createdAt: new Date(),
               userId: user.id,
             },
+            update: {},
           },
         },
       },
@@ -223,29 +342,19 @@ export class PostsService {
 
   async removeHeart(postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';
     }
-    return this.prismaService.client.post.update({
-      where: { postId },
-      data: {
-        Hearts: {
-          disconnect: {
-            postId_userId: {
-              postId,
-              userId: user.id,
-            },
-          },
-        },
-      },
+    return this.prismaService.client.postHeart.deleteMany({
+      where: {postId, userId: user.id},
     });
   }
 
   async repost(postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';
@@ -275,7 +384,7 @@ export class PostsService {
 
   async getComments(postId: number) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';
@@ -310,7 +419,7 @@ export class PostsService {
 
   async addComment(commentDto: CommentDto, postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';
@@ -340,7 +449,7 @@ export class PostsService {
 
   async getImage(postId: number, imageId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: { postId },
+      where: {postId},
     });
     if (!original) {
       return 'no_such_post';

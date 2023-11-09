@@ -42,7 +42,7 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: string) {
+  findOneInner(id: string) {
     return this.prismaService.client.user.findUnique({
       where: {
         id,
@@ -50,8 +50,37 @@ export class UsersService {
     });
   }
 
+  findOne(id: string, user?: User) {
+    console.log(user?.id, 'findOne');
+    const Followers = user ? {
+      select: {
+        id: true,
+      },
+      where: {
+        id: user?.id,
+      }
+    } : false;
+    return this.prismaService.client.user.findUnique({
+      select: {
+        id: true,
+        nickname: true,
+        image: true,
+        Followers,
+        _count: {
+          select: {
+            Followers: true,
+            Followings: true,
+          },
+        }
+      },
+      where: {
+        id,
+      },
+    });
+  }
+
   getFollowRecommends(user?: User) {
-    console.log('user', user);
+    console.log('getFollowRecommends', user);
     const where = user ? {
       Followers: {
         none: {
@@ -65,6 +94,25 @@ export class UsersService {
     return this.prismaService.client.user.findMany({
       skip: 0,
       take: 3,
+      select: {
+        id: true,
+        nickname: true,
+        image: true,
+        Followers: {
+          select: {
+            id: true,
+          },
+          where: {
+            id: user?.id
+          }
+        },
+        _count: {
+          select: {
+            Followers: true,
+            Followings: true,
+          },
+        }
+      },
       where,
       orderBy: [{
         Followers: {

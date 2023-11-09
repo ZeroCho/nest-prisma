@@ -72,7 +72,10 @@ export class ApiController {
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     req.logout(() => {
-      res.send('ok');
+      req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.send('ok');
+      });
     });
   }
 

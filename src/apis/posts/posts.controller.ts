@@ -104,8 +104,9 @@ export class PostsController {
   })
   @UseGuards(LoggedInGuard)
   @Get('')
-  getSearchResult(@Query('cursor') cursor: string, @Query('q') q: string) {
-    return this.postsService.getSearchResult(q, +cursor);
+  getSearchResult(@User() user: UserEntity, @Query('cursor') cursor: string, @Query('q') q: string, @Query('pf') pf?: string, @Query('f') f?: string) {
+    console.log('queryquery', q);
+    return this.postsService.getSearchResult(user, q, +cursor, pf, f);
   }
 
   @ApiOperation({
@@ -115,8 +116,8 @@ export class PostsController {
     description: '게시글 없음(no_such_post)',
   })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.postsService.findOne(+id);
+  findOne(@Param('id') id: string, @User() user: UserEntity) {
+    return this.postsService.findOne(+id, user);
   }
 
   @ApiOperation({

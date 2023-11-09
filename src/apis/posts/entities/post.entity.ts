@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/apis/users/entities/user.entity';
 import {Image} from "./image.entity";
+import {PostUserIdDto} from "../dto/user-id.dto";
+import {CountDto} from "../dto/count.dto";
 
 export class Post {
   @ApiProperty({
@@ -25,6 +27,7 @@ export class Post {
 
   @ApiProperty({
     description: '삭제일',
+    required: false,
   })
   deletedAt?: Date;
 
@@ -38,4 +41,31 @@ export class Post {
     isArray: true,
   })
   Images: Image[];
+
+  @ApiProperty({
+    description: '내가 하트 눌렀는지(달았으면 내 아이디가 들어 있음)',
+    isArray: true,
+    type: PostUserIdDto,
+  })
+  Hearts: PostUserIdDto[]
+
+  @ApiProperty({
+    description: '내가 재게시했는지(달았으면 내 아이디가 들어 있음)',
+    isArray: true,
+    type: PostUserIdDto,
+  })
+  Reposts: PostUserIdDto[]
+
+  @ApiProperty({
+    description: '내가 답글 달았는지(달았으면 내 아이디가 들어 있음)',
+    isArray: true,
+    type: PostUserIdDto,
+  })
+  Comments: PostUserIdDto[]
+
+  @ApiProperty({
+    description: '하트, 재게시, 답글 수',
+    type: CountDto,
+  })
+  _count: CountDto;
 }

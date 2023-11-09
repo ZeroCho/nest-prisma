@@ -45,8 +45,8 @@ import * as cookieParser from "cookie-parser";
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
     }),
-    ApiModule,
     AuthModule,
+    ApiModule,
     RouterModule.register([
       {
         path: 'api',

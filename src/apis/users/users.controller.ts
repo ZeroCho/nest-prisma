@@ -110,11 +110,11 @@ export class UsersController {
   @ApiOperation({ summary: '특정인 정보' })
   @ApiOkResponse({
     description: '유저 정보',
-    type: SignupResponseDto,
+    type: UserEntity,
   })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string, @User() user: UserEntity) {
+    return this.usersService.findOne(id, user);
   }
 
   @ApiOperation({
@@ -126,8 +126,8 @@ export class UsersController {
     isArray: true,
   })
   @Get(':id/posts')
-  findUserPosts(@Param('id') userId: string, @Query('cursor') cursor: number) {
-    return this.postsService.findUserPosts(userId, cursor);
+  findUserPosts(@Param('id') userId: string, @Query('cursor') cursor: number, @User() user: UserEntity) {
+    return this.postsService.findUserPosts(userId, cursor, user);
   }
 
   @ApiExcludeEndpoint()
