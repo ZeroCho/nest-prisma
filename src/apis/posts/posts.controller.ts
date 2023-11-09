@@ -166,7 +166,7 @@ export class PostsController {
     description: '게시글 없음(no_such_post)',
   })
   @UseGuards(LoggedInGuard)
-  @Post(':id/repost')
+  @Post(':id/reposts')
   async repost(@User() user: UserEntity, @Param('id') postId: string) {
     const result = await this.postsService.repost(+postId, user);
     if (result === 'no_such_post') {
@@ -196,20 +196,39 @@ export class PostsController {
   @ApiOkResponse({
     type: PostEntity,
   })
+  @ApiConsumes('multipart/form-data')
   @ApiBody({
-    type: CommentDto,
+    schema: {
+      type: 'object',
+      properties: {
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          },
+          description: '이미지 파일',
+        },
+        content: {
+          type: 'string',
+          description: '컨텐츠',
+        },
+      },
+    },
   })
+  @UseInterceptors(FilesInterceptor('images'))
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
   @UseGuards(LoggedInGuard)
-  @Post(':id/comment')
+  @Post(':id/comments')
   addComment(
-    @User() user,
+    @User() user: UserEntity,
     @Param('id') postId: string,
     @Body() commentDto: CommentDto,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.postsService.addComment(commentDto, +postId, user);
+    return this.postsService.addComment(commentDto, +postId, user, files);
   }
 
   @ApiOperation({

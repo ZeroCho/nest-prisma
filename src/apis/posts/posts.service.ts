@@ -61,7 +61,9 @@ export class PostsService {
   }
 
   findAll(cursor: number, type: 'followings' | 'recommends', user?: User) {
-    const where: Prisma.PostWhereInput = cursor ? {postId: {lt: cursor}} : {};
+    const where: Prisma.PostWhereInput = {};
+    let skip = 0;
+    let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
     if (type === 'followings') {
       where.User = {
         Followers: {
@@ -69,6 +71,26 @@ export class PostsService {
             id: user.id,
           }
         }
+      }
+      orderBy = {
+        createdAt: 'desc',
+      }
+      if (cursor) {
+        where.postId = {
+          lt: cursor,
+        }
+      }
+    }
+    if (type === 'recommends') {
+      orderBy = [{
+        Hearts: {
+          _count: 'desc',
+        }
+      }, {
+        createdAt: 'desc',
+      }];
+      if (cursor) {
+        skip = cursor;
       }
     }
     return this.prismaService.client.post.findMany({
@@ -117,10 +139,9 @@ export class PostsService {
           }
         }
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy,
       take: 10,
+      skip,
     });
   }
 
@@ -375,7 +396,7 @@ export class PostsService {
         Images: true,
       },
       data: {
-        ...original,
+        content: 'repost',
         userId: user.id,
         originalId: postId,
       },
@@ -417,7 +438,7 @@ export class PostsService {
     });
   }
 
-  async addComment(commentDto: CommentDto, postId: number, user: User) {
+  async addComment(commentDto: CommentDto, postId: number, user: User, files: Express.Multer.File[]) {
     const original = await this.prismaService.client.post.findUnique({
       where: {postId},
     });
@@ -440,7 +461,7 @@ export class PostsService {
         Images: true,
       },
       data: {
-        ...commentDto,
+        content: commentDto.content,
         userId: user.id,
         parentId: postId,
       },
