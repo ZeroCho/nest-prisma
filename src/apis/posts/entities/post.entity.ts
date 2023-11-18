@@ -68,4 +68,16 @@ export class Post {
     type: CountDto,
   })
   _count: CountDto;
+
+  @ApiProperty({
+    description: '답글에 대한 부모',
+    type: Post,
+  })
+  Parent: Post;
+
+  @ApiProperty({
+    description: '재게시 원글',
+    type: Post,
+  })
+  Original: Post;
 }

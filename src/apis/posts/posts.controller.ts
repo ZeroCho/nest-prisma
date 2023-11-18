@@ -78,8 +78,8 @@ export class PostsController {
     isArray: true,
   })
   @Get('recommends')
-  findRecent(@Query('cursor') cursor: string) {
-    return this.postsService.findAll(+cursor, 'recommends');
+  findRecent(@Query('cursor') cursor: string, @Query('likes') likes: string) {
+    return this.postsService.findAll(+cursor, 'recommends', null, +likes);
   }
 
   @ApiOperation({

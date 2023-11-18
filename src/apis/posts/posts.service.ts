@@ -60,7 +60,7 @@ export class PostsService {
     });
   }
 
-  findAll(cursor: number, type: 'followings' | 'recommends', user?: User) {
+  findAll(cursor: number, type: 'followings' | 'recommends', user?: User, likes?: number) {
     const where: Prisma.PostWhereInput = {};
     let skip = 0;
     let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
@@ -120,7 +120,34 @@ export class PostsService {
           },
           where: {
             userId: user?.id,
-          }
+          },
+        },
+        Original: {
+          select: {
+            postId: true,
+            content: true,
+            createdAt: true,
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
+        Parent: {
+          select: {
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
         },
         Reposts: {
           select: {
@@ -174,6 +201,33 @@ export class PostsService {
         postId: true,
         createdAt: true,
         Images: true,
+        Original: {
+          select: {
+            postId: true,
+            content: true,
+            createdAt: true,
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
+        Parent: {
+          select: {
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
         User: {
           select: {
             id: true,
@@ -247,6 +301,33 @@ export class PostsService {
             userId: user?.id,
           }
         },
+        Original: {
+          select: {
+            postId: true,
+            content: true,
+            createdAt: true,
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
+        Parent: {
+          select: {
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
         Reposts: {
           select: {
             userId: true,
@@ -281,6 +362,64 @@ export class PostsService {
             id: true,
             nickname: true,
           }
+        },
+        Original: {
+          select: {
+            postId: true,
+            content: true,
+            createdAt: true,
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+            Hearts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user.id,
+              }
+            },
+            Reposts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user.id,
+              }
+            },
+            Comments: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user.id,
+              }
+            },
+            _count: {
+              select: {
+                Reposts: true,
+                Comments: true,
+                Hearts: true,
+              }
+            },
+          },
+        },
+        Parent: {
+          select: {
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
         },
         content: true,
         createdAt: true,
@@ -403,7 +542,7 @@ export class PostsService {
     });
   }
 
-  async getComments(postId: number) {
+  async getComments(postId: number, user?: User) {
     const original = await this.prismaService.client.post.findUnique({
       where: {postId},
     });
@@ -423,7 +562,64 @@ export class PostsService {
         createdAt: true,
         postId: true,
         Images: true,
-        Parent: true,
+        Original: {
+          select: {
+            postId: true,
+            content: true,
+            createdAt: true,
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+            Hearts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            },
+            Reposts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            },
+            Comments: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            },
+            _count: {
+              select: {
+                Reposts: true,
+                Comments: true,
+                Hearts: true,
+              }
+            },
+          },
+        },
+        Parent: {
+          select: {
+            User: {
+              select: {
+                id: true,
+                nickname: true,
+                image: true,
+              }
+            },
+            Images: true,
+          },
+        },
         _count: {
           select: {
             Reposts: true,
