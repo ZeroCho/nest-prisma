@@ -41,20 +41,20 @@ export class PostsService {
         userId: user.id,
         Images: {
           createMany: {
-            data: files.map((v) => ({
+            data: files?.map((v) => ({
               link: '/' + v.path.replaceAll('\\', '/'),
-            })),
+            })) || [],
           },
         },
         Hashtags: {
-          connectOrCreate: hashtags.map((tag) => ({
+          connectOrCreate: hashtags?.map((tag) => ({
             where: {
               title: tag,
             },
             create: {
               title: tag,
             },
-          }))
+          })) || []
         }
       },
     });
@@ -184,8 +184,12 @@ export class PostsService {
       createdAt: 'desc',
     }];
     if (pf === 'on') {
-      where.User.Followers.some = {
-        id: user.id,
+      where.User = {
+        Followers: {
+          some: {
+            id: user.id,
+          }
+        }
       }
     }
     if (f === 'live') {
@@ -542,12 +546,20 @@ export class PostsService {
     });
   }
 
-  async getComments(postId: number, user?: User) {
+  async getComments(postId: number, user?: User, cursor?: number) {
     const original = await this.prismaService.client.post.findUnique({
       where: {postId},
     });
     if (!original) {
       return 'no_such_post';
+    }
+    let where: Prisma.PostWhereInput = {
+      parentId: postId,
+    };
+    if (cursor) {
+      where.postId = {
+        lt: cursor,
+      };
     }
     return this.prismaService.client.post.findMany({
       select: {
@@ -628,9 +640,8 @@ export class PostsService {
           }
         }
       },
-      where: {
-        parentId: postId,
-      },
+      where,
+      take: 10,
     });
   }
 
@@ -641,6 +652,7 @@ export class PostsService {
     if (!original) {
       return 'no_such_post';
     }
+    const hashtags = commentDto.content.match(/#[^\s#]+/g);
     return this.prismaService.client.post.create({
       select: {
         User: {
@@ -650,7 +662,17 @@ export class PostsService {
             nickname: true,
           }
         },
-        Parent: true,
+        Parent: {
+          select: {
+            User: {
+              select: {
+                image: true,
+                id: true,
+                nickname: true,
+              }
+            }
+          }
+        },
         content: true,
         createdAt: true,
         postId: true,
@@ -660,6 +682,23 @@ export class PostsService {
         content: commentDto.content,
         userId: user.id,
         parentId: postId,
+        Images: {
+          createMany: {
+            data: files?.map((v) => ({
+              link: '/' + v.path.replaceAll('\\', '/'),
+            })) || [],
+          },
+        },
+        Hashtags: {
+          connectOrCreate: hashtags?.map((tag) => ({
+            where: {
+              title: tag,
+            },
+            create: {
+              title: tag,
+            },
+          })) || []
+        }
       },
     });
   }

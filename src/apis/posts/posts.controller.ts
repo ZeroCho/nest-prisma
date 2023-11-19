@@ -186,8 +186,8 @@ export class PostsController {
     description: '게시글 없음(no_such_post)',
   })
   @Get(':id/comments')
-  comment(@Param('id') postId: string) {
-    return this.postsService.getComments(+postId);
+  comment(@Param('id') postId: string, @User() user: UserEntity, @Query('cursor') cursor: string) {
+    return this.postsService.getComments(+postId, user, +cursor);
   }
 
   @ApiOperation({
