@@ -385,7 +385,7 @@ export class PostsService {
                 userId: true,
               },
               where: {
-                userId: user.id,
+                userId: user?.id,
               }
             },
             Reposts: {
@@ -393,7 +393,7 @@ export class PostsService {
                 userId: true,
               },
               where: {
-                userId: user.id,
+                userId: user?.id,
               }
             },
             Comments: {
@@ -401,7 +401,7 @@ export class PostsService {
                 userId: true,
               },
               where: {
-                userId: user.id,
+                userId: user?.id,
               }
             },
             _count: {
@@ -441,7 +441,7 @@ export class PostsService {
             userId: true,
           },
           where: {
-            userId: user.id,
+            userId: user?.id,
           }
         },
         Reposts: {
@@ -449,7 +449,7 @@ export class PostsService {
             userId: true,
           },
           where: {
-            userId: user.id,
+            userId: user?.id,
           }
         },
         Comments: {
@@ -457,7 +457,7 @@ export class PostsService {
             userId: true,
           },
           where: {
-            userId: user.id,
+            userId: user?.id,
           }
         }
       },
