@@ -51,21 +51,37 @@ export class UsersService {
   }
 
   findOne(id: string, user?: User) {
-    console.log(user?.id, 'findOne');
-    const Followers = user ? {
-      select: {
-        id: true,
-      },
-      where: {
-        id: user?.id,
-      }
-    } : false;
+    if (user) {
+      return this.prismaService.client.user.findUnique({
+        select: {
+          id: true,
+          nickname: true,
+          image: true,
+          Followers: {
+            select: {
+              id: true,
+            },
+            where: {
+              id: user.id,
+            }
+          },
+          _count: {
+            select: {
+              Followers: true,
+              Followings: true,
+            },
+          }
+        },
+        where: {
+          id,
+        },
+      });
+    }
     return this.prismaService.client.user.findUnique({
       select: {
         id: true,
         nickname: true,
         image: true,
-        Followers,
         _count: {
           select: {
             Followers: true,
