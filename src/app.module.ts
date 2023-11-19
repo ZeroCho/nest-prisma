@@ -40,6 +40,7 @@ import * as cookieParser from "cookie-parser";
     }),
     RedisModule,
     ServeStaticModule.forRoot({
+      serveRoot: 'upload',
       rootPath: join(__dirname, '..', 'upload'),
     }),
     ServeStaticModule.forRoot({
