@@ -176,6 +176,26 @@ export class PostsController {
   }
 
   @ApiOperation({
+    summary: '재게시 제거하기',
+  })
+  @ApiOkResponse({
+    type: 'ok',
+    description: '제거 성공 시 ok'
+  })
+  @ApiNotFoundResponse({
+    description: '게시글 없음(no_such_post)',
+  })
+  @UseGuards(LoggedInGuard)
+  @Delete(':id/reposts')
+  async deleteRepost(@User() user: UserEntity, @Param('id') postId: string) {
+    const result = await this.postsService.deleteRepost(+postId, user);
+    if (result === 'no_such_post') {
+      throw new NotFoundException('no_such_post');
+    }
+    return result;
+  }
+
+  @ApiOperation({
     summary: '댓글 조회',
   })
   @ApiOkResponse({

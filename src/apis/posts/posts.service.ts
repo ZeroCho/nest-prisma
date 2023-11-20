@@ -357,7 +357,7 @@ export class PostsService {
     });
   }
 
-  findOne(id: number, user: User) {
+  findOne(id: number, user?: User) {
     return this.prismaService.client.post.findUnique({
       select: {
         User: {
@@ -544,6 +544,35 @@ export class PostsService {
         originalId: postId,
       },
     });
+  }
+
+  async deleteRepost(postId: number, user: User) {
+    const original = await this.prismaService.client.post.findUnique({
+      where: {postId},
+      select: {
+        postId: true,
+        Reposts: {
+          select: {
+            postId: true,
+          },
+          where: {
+            userId: user.id,
+          }
+        }
+      }
+    });
+    if (!original) {
+      return 'no_such_post';
+    }
+    if (!original.Reposts[0]) {
+      return 'no_such_post';
+    }
+    await this.prismaService.client.post.delete({
+      where: {
+        postId: original.Reposts[0].postId,
+      },
+    });
+    return 'ok';
   }
 
   async getComments(postId: number, user?: User, cursor?: number) {
