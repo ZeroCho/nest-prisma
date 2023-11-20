@@ -532,11 +532,21 @@ export class PostsService {
             nickname: true,
           }
         },
-        Original: true,
-        content: true,
-        createdAt: true,
-        postId: true,
-        Images: true,
+        Original: {
+          select: {
+            content: true,
+            createdAt: true,
+            postId: true,
+            Images: true,
+            User: {
+              select: {
+                image: true,
+                id: true,
+                nickname: true,
+              }
+            }
+          }
+        },
       },
       data: {
         content: 'repost',
