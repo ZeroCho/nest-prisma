@@ -65,13 +65,20 @@ export class PostsService {
     let skip = 0;
     let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
     if (type === 'followings') {
-      where.User = {
-        Followers: {
-          some: {
-            id: user.id,
-          }
+      where.OR = [
+        {
+          User: {
+            Followers: {
+              some: {
+                id: user.id,
+              }
+            }
+          },
+        },
+        {
+          userId: user.id,
         }
-      }
+      ];
       orderBy = {
         createdAt: 'desc',
       }
@@ -562,7 +569,7 @@ export class PostsService {
     return this.prismaService.client.post.update({
       where: {postId},
       data: {
-        heartCount: { increment: 1 },
+        heartCount: {increment: 1},
         Hearts: {
           upsert: {
             where: {
@@ -592,7 +599,7 @@ export class PostsService {
     return this.prismaService.client.post.update({
       where: {postId},
       data: {
-        heartCount: { decrement: 1 },
+        heartCount: {decrement: 1},
         Hearts: {
           delete: {
             postId_userId: {
