@@ -26,21 +26,24 @@ model User {
 }
 
 model Post {
-  postId     Int         @id @default(autoincrement())
-  content    String
-  userId     String
-  User       User        @relation(fields: [userId], references: [id])
-  createdAt  DateTime    @default(now())
-  Images     PostImage[]
-  Hashtags   Hashtag[]
-  parentId   Int?
-  Parent     Post?       @relation("comment", fields: [parentId], references: [postId])
-  Comments   Post[]      @relation("comment")
-  originalId Int?
-  Original   Post?       @relation("repost", fields: [originalId], references: [postId])
-  Reposts    Post[]      @relation("repost")
-  Hearts     PostHeart[]
-  deletedAt  DateTime?
+  postId       Int         @id @default(autoincrement())
+  content      String
+  userId       String
+  User         User        @relation(fields: [userId], references: [id])
+  createdAt    DateTime    @default(now())
+  Images       PostImage[]
+  Hashtags     Hashtag[]
+  parentId     Int?
+  commentCount Int         @default(0)
+  heartCount   Int         @default(0)
+  repostCount  Int         @default(0)
+  Parent       Post?       @relation("comment", fields: [parentId], references: [postId])
+  Comments     Post[]      @relation("comment")
+  originalId   Int?
+  Original     Post?       @relation("repost", fields: [originalId], references: [postId])
+  Reposts      Post[]      @relation("repost")
+  Hearts       PostHeart[]
+  deletedAt    DateTime?
 }
 
 model PostHeart {

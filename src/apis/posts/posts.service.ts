@@ -60,7 +60,7 @@ export class PostsService {
     });
   }
 
-  findAll(cursor: number, type: 'followings' | 'recommends', user?: User, likes?: number) {
+  async findAll(cursor: number, type: 'followings' | 'recommends', user?: User, likes?: number) {
     const where: Prisma.PostWhereInput = {};
     let skip = 0;
     let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[];
@@ -83,17 +83,51 @@ export class PostsService {
     }
     if (type === 'recommends') {
       orderBy = [{
-        Hearts: {
-          _count: 'desc',
-        }
+        heartCount: 'desc',
       }, {
-        createdAt: 'desc',
+        postId: 'desc',
       }];
       if (cursor) {
-        skip = cursor;
+        const cursorPost = await this.prismaService.client.post.findFirst({
+          where: {
+            postId: cursor,
+          },
+        });
+
+        where.OR = [
+          {
+            heartCount: {lt: cursorPost.heartCount},
+          },
+          {
+            heartCount: cursorPost.heartCount,
+            postId: {
+              lt: cursor,
+            }
+          },
+        ]
       }
     }
-    return this.prismaService.client.post.findMany({
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.post.findMany({
       where,
       select: {
         content: true,
@@ -107,13 +141,10 @@ export class PostsService {
             image: true,
           }
         },
-        _count: {
-          select: {
-            Reposts: true,
-            Comments: true,
-            Hearts: true,
-          }
-        },
+        heartCount: true,
+        repostCount: true,
+        commentCount: true,
+        _count: true,
         Hearts: {
           select: {
             userId: true,
@@ -177,11 +208,9 @@ export class PostsService {
       ? {postId: {lt: cursor}, content: {contains: q}}
       : {content: {contains: q}};
     let orderBy: Prisma.PostOrderByWithRelationInput | Prisma.PostOrderByWithRelationInput[] = [{
-      Hearts: {
-        _count: 'desc'
-      },
+      heartCount: 'desc',
     }, {
-      createdAt: 'desc',
+      postId: 'desc',
     }];
     if (pf === 'on') {
       where.User = {
@@ -194,10 +223,30 @@ export class PostsService {
     }
     if (f === 'live') {
       orderBy = {
-        createdAt: 'desc',
+        postId: 'desc',
       }
     }
-    return this.prismaService.client.post.findMany({
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.post.findMany({
       where,
       orderBy,
       select: {
@@ -239,13 +288,10 @@ export class PostsService {
             image: true,
           }
         },
-        _count: {
-          select: {
-            Reposts: true,
-            Comments: true,
-            Hearts: true,
-          }
-        },
+        heartCount: true,
+        repostCount: true,
+        commentCount: true,
+        _count: true,
         Hearts: {
           select: {
             userId: true,
@@ -277,7 +323,27 @@ export class PostsService {
 
   findUserPosts(userId: string, cursor: number, user?: User) {
     const where = cursor ? {userId, postId: {lt: cursor}} : {userId};
-    return this.prismaService.client.post.findMany({
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.post.findMany({
       select: {
         User: {
           select: {
@@ -290,13 +356,10 @@ export class PostsService {
         createdAt: true,
         postId: true,
         Images: true,
-        _count: {
-          select: {
-            Reposts: true,
-            Comments: true,
-            Hearts: true,
-          }
-        },
+        heartCount: true,
+        repostCount: true,
+        commentCount: true,
+        _count: true,
         Hearts: {
           select: {
             userId: true,
@@ -358,7 +421,27 @@ export class PostsService {
   }
 
   findOne(id: number, user?: User) {
-    return this.prismaService.client.post.findUnique({
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.post.findUnique({
       select: {
         User: {
           select: {
@@ -404,13 +487,10 @@ export class PostsService {
                 userId: user?.id,
               }
             },
-            _count: {
-              select: {
-                Reposts: true,
-                Comments: true,
-                Hearts: true,
-              }
-            },
+            heartCount: true,
+            repostCount: true,
+            commentCount: true,
+            _count: true,
           },
         },
         Parent: {
@@ -429,13 +509,10 @@ export class PostsService {
         createdAt: true,
         postId: true,
         Images: true,
-        _count: {
-          select: {
-            Reposts: true,
-            Comments: true,
-            Hearts: true,
-          }
-        },
+        heartCount: true,
+        repostCount: true,
+        commentCount: true,
+        _count: true,
         Hearts: {
           select: {
             userId: true,
@@ -485,6 +562,7 @@ export class PostsService {
     return this.prismaService.client.post.update({
       where: {postId},
       data: {
+        heartCount: { increment: 1 },
         Hearts: {
           upsert: {
             where: {
@@ -511,9 +589,20 @@ export class PostsService {
     if (!original) {
       return 'no_such_post';
     }
-    return this.prismaService.client.postHeart.deleteMany({
-      where: {postId, userId: user.id},
-    });
+    return this.prismaService.client.post.update({
+      where: {postId},
+      data: {
+        heartCount: { decrement: 1 },
+        Hearts: {
+          delete: {
+            postId_userId: {
+              userId: user.id,
+              postId: postId,
+            },
+          },
+        },
+      },
+    })
   }
 
   async repost(postId: number, user: User) {
@@ -523,36 +612,44 @@ export class PostsService {
     if (!original) {
       return 'no_such_post';
     }
-    return this.prismaService.client.post.create({
-      select: {
-        User: {
-          select: {
-            image: true,
-            id: true,
-            nickname: true,
-          }
-        },
-        Original: {
-          select: {
-            content: true,
-            createdAt: true,
-            postId: true,
-            Images: true,
-            User: {
-              select: {
-                image: true,
-                id: true,
-                nickname: true,
+    return this.prismaService.client.$transaction(async (tx) => {
+      await tx.post.update({
+        where: {postId},
+        data: {
+          repostCount: {increment: 1},
+        }
+      });
+      return tx.post.create({
+        select: {
+          User: {
+            select: {
+              image: true,
+              id: true,
+              nickname: true,
+            }
+          },
+          Original: {
+            select: {
+              content: true,
+              createdAt: true,
+              postId: true,
+              Images: true,
+              User: {
+                select: {
+                  image: true,
+                  id: true,
+                  nickname: true,
+                }
               }
             }
-          }
+          },
         },
-      },
-      data: {
-        content: 'repost',
-        userId: user.id,
-        originalId: postId,
-      },
+        data: {
+          content: 'repost',
+          userId: user.id,
+          originalId: postId,
+        },
+      });
     });
   }
 
@@ -577,12 +674,20 @@ export class PostsService {
     if (!original.Reposts[0]) {
       return 'no_such_post';
     }
-    await this.prismaService.client.post.delete({
-      where: {
-        postId: original.Reposts[0].postId,
-      },
+    return this.prismaService.client.$transaction(async (tx) => {
+      await tx.post.update({
+        where: {postId},
+        data: {
+          repostCount: {decrement: 1},
+        }
+      });
+      await tx.post.delete({
+        where: {
+          postId: original.Reposts[0].postId,
+        },
+      });
+      return 'ok';
     });
-    return 'ok';
   }
 
   async getComments(postId: number, user?: User, cursor?: number) {
@@ -600,7 +705,27 @@ export class PostsService {
         lt: cursor,
       };
     }
-    return this.prismaService.client.post.findMany({
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.post.findMany({
       select: {
         User: {
           select: {
@@ -650,13 +775,10 @@ export class PostsService {
                 userId: user?.id,
               }
             },
-            _count: {
-              select: {
-                Reposts: true,
-                Comments: true,
-                Hearts: true,
-              }
-            },
+            heartCount: true,
+            repostCount: true,
+            commentCount: true,
+            _count: true,
           },
         },
         Parent: {
@@ -671,13 +793,10 @@ export class PostsService {
             Images: true,
           },
         },
-        _count: {
-          select: {
-            Reposts: true,
-            Comments: true,
-            Hearts: true,
-          }
-        }
+        heartCount: true,
+        repostCount: true,
+        commentCount: true,
+        _count: true,
       },
       where,
       take: 10,
@@ -692,53 +811,61 @@ export class PostsService {
       return 'no_such_post';
     }
     const hashtags = commentDto.content.match(/#[^\s#]+/g);
-    return this.prismaService.client.post.create({
-      select: {
-        User: {
-          select: {
-            image: true,
-            id: true,
-            nickname: true,
-          }
-        },
-        Parent: {
-          select: {
-            User: {
-              select: {
-                image: true,
-                id: true,
-                nickname: true,
+    return this.prismaService.client.$transaction(async (tx) => {
+      await tx.post.update({
+        where: {postId},
+        data: {
+          commentCount: {increment: 1},
+        }
+      });
+      return tx.post.create({
+        select: {
+          User: {
+            select: {
+              image: true,
+              id: true,
+              nickname: true,
+            }
+          },
+          Parent: {
+            select: {
+              User: {
+                select: {
+                  image: true,
+                  id: true,
+                  nickname: true,
+                }
               }
             }
+          },
+          content: true,
+          createdAt: true,
+          postId: true,
+          Images: true,
+        },
+        data: {
+          content: commentDto.content,
+          userId: user.id,
+          parentId: postId,
+          Images: {
+            createMany: {
+              data: files?.map((v) => ({
+                link: '/' + v.path.replaceAll('\\', '/'),
+              })) || [],
+            },
+          },
+          Hashtags: {
+            connectOrCreate: hashtags?.map((tag) => ({
+              where: {
+                title: tag,
+              },
+              create: {
+                title: tag,
+              },
+            })) || []
           }
         },
-        content: true,
-        createdAt: true,
-        postId: true,
-        Images: true,
-      },
-      data: {
-        content: commentDto.content,
-        userId: user.id,
-        parentId: postId,
-        Images: {
-          createMany: {
-            data: files?.map((v) => ({
-              link: '/' + v.path.replaceAll('\\', '/'),
-            })) || [],
-          },
-        },
-        Hashtags: {
-          connectOrCreate: hashtags?.map((tag) => ({
-            where: {
-              title: tag,
-            },
-            create: {
-              title: tag,
-            },
-          })) || []
-        }
-      },
+      });
     });
   }
 
