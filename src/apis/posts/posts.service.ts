@@ -625,7 +625,27 @@ export class PostsService {
     if (reposted) {
       return 'already_reposted';
     }
-    return this.prismaService.client.$transaction(async (tx) => {
+    const xprisma = this.prismaService.client.$extends({
+      result: {
+        post: {
+          _count: {
+            needs: {
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+            },
+            compute(post: { heartCount: number, repostCount: number, commentCount: number }) {
+              return {
+                Hearts: post.heartCount,
+                Reposts: post.repostCount,
+                Comments: post.commentCount,
+              }
+            }
+          }
+        }
+      }
+    })
+    return xprisma.$transaction(async (tx) => {
       await tx.post.update({
         where: {postId},
         data: {
@@ -653,7 +673,35 @@ export class PostsService {
                   id: true,
                   nickname: true,
                 }
-              }
+              },
+              heartCount: true,
+              repostCount: true,
+              commentCount: true,
+              _count: true,
+              Hearts: {
+                select: {
+                  userId: true,
+                },
+                where: {
+                  userId: user?.id,
+                }
+              },
+              Reposts: {
+                select: {
+                  userId: true,
+                },
+                where: {
+                  userId: user?.id,
+                }
+              },
+              Comments: {
+                select: {
+                  userId: true,
+                },
+                where: {
+                  userId: user?.id,
+                }
+              },
             }
           },
         },
