@@ -152,14 +152,6 @@ export class PostsService {
         repostCount: true,
         commentCount: true,
         _count: true,
-        Hearts: {
-          select: {
-            userId: true,
-          },
-          where: {
-            userId: user?.id,
-          },
-        },
         Original: {
           select: {
             postId: true,
@@ -172,7 +164,35 @@ export class PostsService {
                 image: true,
               }
             },
+            heartCount: true,
+            repostCount: true,
+            commentCount: true,
+            _count: true,
             Images: true,
+            Hearts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              },
+            },
+            Reposts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            },
+            Comments: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            }
           },
         },
         Parent: {
@@ -185,6 +205,14 @@ export class PostsService {
               }
             },
             Images: true,
+          },
+        },
+        Hearts: {
+          select: {
+            userId: true,
+          },
+          where: {
+            userId: user?.id,
           },
         },
         Reposts: {
@@ -562,9 +590,20 @@ export class PostsService {
   async addHeart(postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
       where: {postId},
+      select: {
+        postId: true,
+        Hearts: {
+          where: {
+            userId: user?.id,
+          }
+        }
+      }
     });
     if (!original) {
       return 'no_such_post';
+    }
+    if (original.Hearts.find((v) => v.userId === user.id)) {
+      return 'already_hearted';
     }
     return this.prismaService.client.post.update({
       where: {postId},

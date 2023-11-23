@@ -136,13 +136,20 @@ export class PostsController {
   @ApiOperation({
     summary: '하트 달기',
   })
+  @ApiBadRequestResponse({
+    description: '이미 하트 누름(already_hearted)',
+  })
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
   @UseGuards(LoggedInGuard)
   @Post(':id/heart')
-  addHeart(@User() user: UserEntity, @Param('id') postId: string) {
-    return this.postsService.addHeart(+postId, user);
+  async addHeart(@User() user: UserEntity, @Param('id') postId: string) {
+    const result = await this.postsService.addHeart(+postId, user);
+    if (result === 'no_such_post' || result === 'already_hearted') {
+      throw new NotFoundException(result);
+    }
+    return result;
   }
 
   @ApiOperation({
@@ -173,11 +180,8 @@ export class PostsController {
   @Post(':id/reposts')
   async repost(@User() user: UserEntity, @Param('id') postId: string) {
     const result = await this.postsService.repost(+postId, user);
-    if (result === 'no_such_post') {
-      throw new NotFoundException('no_such_post');
-    }
-    if (result === 'already_reposted') {
-      throw new BadRequestException('already_reposted');
+    if (result === 'no_such_post' || result === 'already_reposted') {
+      throw new NotFoundException(result);
     }
     return result;
   }
