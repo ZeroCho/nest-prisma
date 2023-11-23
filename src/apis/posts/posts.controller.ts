@@ -9,14 +9,15 @@ import {
   UseInterceptors,
   UploadedFiles,
   UseGuards,
-  NotFoundException,
+  NotFoundException, BadRequestException,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { User } from '../../common/decorators/user.decorator';
 import { CommentDto } from './dto/comment.dto';
 import {
-  ApiBody, ApiConsumes,
+  ApiBadRequestResponse,
+  ApiBody, ApiConsumes, ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -165,12 +166,18 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
+  @ApiBadRequestResponse({
+    description: '이미 재게시 함(already_reposted)',
+  })
   @UseGuards(LoggedInGuard)
   @Post(':id/reposts')
   async repost(@User() user: UserEntity, @Param('id') postId: string) {
     const result = await this.postsService.repost(+postId, user);
     if (result === 'no_such_post') {
       throw new NotFoundException('no_such_post');
+    }
+    if (result === 'already_reposted') {
+      throw new BadRequestException('already_reposted');
     }
     return result;
   }

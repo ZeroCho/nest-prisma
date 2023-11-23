@@ -614,10 +614,16 @@ export class PostsService {
 
   async repost(postId: number, user: User) {
     const original = await this.prismaService.client.post.findUnique({
-      where: {postId},
+      where: {postId, originalId: null},
     });
     if (!original) {
       return 'no_such_post';
+    }
+    const reposted = await this.prismaService.client.post.findFirst({
+      where: {originalId: original.postId, userId: user.id},
+    });
+    if (reposted) {
+      return 'already_reposted';
     }
     return this.prismaService.client.$transaction(async (tx) => {
       await tx.post.update({
