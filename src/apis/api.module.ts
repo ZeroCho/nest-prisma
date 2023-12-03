@@ -5,6 +5,7 @@ import { PostsModule } from './posts/posts.module';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { RouterModule } from '@nestjs/core';
+import {MessagesModule} from "./messages/messages.module";
 
 @Module({
   controllers: [ApiController],
@@ -13,6 +14,7 @@ import { RouterModule } from '@nestjs/core';
     HashtagsModule,
     UsersModule,
     PostsModule,
+    MessagesModule,
     RouterModule.register([
       {
         path: 'api',
@@ -25,6 +27,10 @@ import { RouterModule } from '@nestjs/core';
       {
         path: 'api',
         module: PostsModule,
+      },
+      {
+        path: 'api',
+        module: MessagesModule,
       },
     ]),
   ],

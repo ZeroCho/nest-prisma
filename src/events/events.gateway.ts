@@ -10,6 +10,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { onlineMap } from './onlineMap';
+import {MessagesService} from "../apis/messages/messages.service";
+import {CreateMessageDto} from "../apis/messages/dto/create-message.dto";
 
 @WebSocketGateway({ namespace: /\/ws-.+/ })
 export class EventsGateway
@@ -17,24 +19,33 @@ export class EventsGateway
 {
   @WebSocketServer() public server: Server;
 
+  constructor(
+    private messageService: MessagesService,
+  ) {}
+
   @SubscribeMessage('test')
   handleTest(@MessageBody() data: string) {
     console.log('test', data);
   }
 
+  @SubscribeMessage('sendMessage')
+  async sendMessage(@MessageBody() data: CreateMessageDto, @ConnectedSocket() socket: Socket) {
+    console.log('test', data);
+    const message = await this.messageService.create(data);
+    const ids = [data.senderId, data.receiverId];
+    ids.sort();
+    const receiverSocketId = onlineMap[data.receiverId];
+    if (receiverSocketId) {
+      socket.to(receiverSocketId).emit('sendMessage', message);
+    }
+  }
+
   @SubscribeMessage('login')
   handleLogin(
-    @MessageBody() data: { id: number; channels: number[] },
+    @MessageBody() data: { id: number },
     @ConnectedSocket() socket: Socket,
   ) {
-    const newNamespace = socket.nsp;
-    console.log('login', newNamespace);
-    onlineMap[socket.nsp.name][socket.id] = data.id;
-    newNamespace.emit('onlineList', Object.values(onlineMap[socket.nsp.name]));
-    data.channels.forEach((channel) => {
-      console.log('join', socket.nsp.name, channel);
-      socket.join(`${socket.nsp.name}-${channel}`);
-    });
+    onlineMap[data.id] = socket.id;
   }
 
   afterInit(server: Server): any {
@@ -43,17 +54,9 @@ export class EventsGateway
 
   handleConnection(@ConnectedSocket() socket: Socket) {
     console.log('connected', socket.nsp.name);
-    if (!onlineMap[socket.nsp.name]) {
-      onlineMap[socket.nsp.name] = {};
-    }
-    // broadcast to all clients in the given sub-namespace
-    socket.emit('hello', socket.nsp.name);
   }
 
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     console.log('disconnected', socket.nsp.name);
-    const newNamespace = socket.nsp;
-    delete onlineMap[socket.nsp.name][socket.id];
-    newNamespace.emit('onlineList', Object.values(onlineMap[socket.nsp.name]));
   }
 }

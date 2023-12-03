@@ -12,10 +12,10 @@ import {
   UploadedFile,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { PostsService } from '../posts/posts.service';
+import {UsersService} from './users.service';
+import {CreateUserDto} from './dto/create-user.dto';
+import {UpdateUserDto} from './dto/update-user.dto';
+import {PostsService} from '../posts/posts.service';
 import {
   ApiBody,
   ApiConsumes,
@@ -26,12 +26,17 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Post as PostEntity } from '../posts/entities/post.entity';
-import { User as UserEntity } from './entities/user.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { SignupResponseDto } from './dto/signup.response.dto';
-import { NotLoggedInGuard } from '../../auth/not-logged-in-guard';
+import {Post as PostEntity} from '../posts/entities/post.entity';
+import {User as UserEntity} from './entities/user.entity';
+import {FileInterceptor} from '@nestjs/platform-express';
+import {SignupResponseDto} from './dto/signup.response.dto';
+import {NotLoggedInGuard} from '../../auth/not-logged-in-guard';
 import {User} from "../../common/decorators/user.decorator";
+import {TrendsDto} from "../messages/dto/trends.dto";
+import {LoggedInGuard} from "../../auth/logged-in-guard";
+import {MessagesService} from "../messages/messages.service";
+import {RoomDto} from "./dto/room.dto";
+import {Message} from "../messages/entities/message.entity";
 
 @ApiTags('유저 관련')
 @Controller('users')
@@ -39,9 +44,11 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly postsService: PostsService,
-  ) {}
+    private readonly messagesService: MessagesService,
+  ) {
+  }
 
-  @ApiOperation({ summary: '회원 가입' })
+  @ApiOperation({summary: '회원 가입'})
   @ApiForbiddenResponse({
     description: '아이디 이미 있음(already_exist)',
   })
@@ -107,7 +114,7 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @ApiOperation({ summary: '특정인 정보' })
+  @ApiOperation({summary: '특정인 정보'})
   @ApiOkResponse({
     description: '유저 정보',
     type: UserEntity,
@@ -142,7 +149,7 @@ export class UsersController {
     return this.usersService.remove(+id);
   }
 
-  @ApiOperation({ summary: '팔로우' })
+  @ApiOperation({summary: '팔로우'})
   @ApiOkResponse({
     description: '성공시 팔로우한 아이디 반환'
   })
@@ -158,7 +165,7 @@ export class UsersController {
     return result.id;
   }
 
-  @ApiOperation({ summary: '언팔로우' })
+  @ApiOperation({summary: '언팔로우'})
   @ApiOkResponse({
     description: '성공시 언팔로우한 아이디 반환'
   })
@@ -172,5 +179,46 @@ export class UsersController {
       throw new ForbiddenException('self_impossible');
     }
     return result.id;
+  }
+
+
+  @ApiOperation({summary: '현재 참여중인 방들'})
+  @Get(':id/rooms')
+  @ApiOkResponse({
+    description: '방들',
+    type: RoomDto,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    description: '로그인하지 않음',
+  })
+  @UseGuards(LoggedInGuard)
+  getRooms(@User() user: UserEntity, @Param('id') id: string) {
+    console.log(id, user.id);
+    if (id !== user.id) {
+      throw new ForbiddenException();
+    }
+    return this.messagesService.getRooms(id);
+  }
+
+
+  @ApiOperation({summary: '현재 방 메시지 조회(roomId는 상대방 아이디)'})
+  @Get(':id/rooms/:roomId')
+  @ApiOkResponse({
+    description: '메시지 30개씩',
+    type: Message,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    description: '로그인하지 않음',
+  })
+  @UseGuards(LoggedInGuard)
+  getRoomMessage(@User() user: UserEntity, @Query('cursor') cursor: string, @Param('roomId') id: string, @Param('roomId') roomId: string) {
+    if (id !== user.id) {
+      throw new ForbiddenException();
+    }
+    const ids = [user.id, roomId];
+    ids.sort();
+    return this.messagesService.getRoomMessage(ids.join('-'), +cursor);
   }
 }

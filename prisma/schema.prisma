@@ -11,18 +11,20 @@ datasource db {
 }
 
 model User {
-  id         String      @id
-  nickname   String
-  image      String
-  password   String
-  Posts      Post[]
-  provider   String      @default("local")
-  snsId      String?
-  createdAt  DateTime    @default(now())
-  Hearts     PostHeart[]
-  deletedAt  DateTime?
-  Followers  User[]      @relation("Follow")
-  Followings User[]      @relation("Follow")
+  id               String      @id
+  nickname         String
+  image            String
+  password         String
+  Posts            Post[]
+  provider         String      @default("local")
+  snsId            String?
+  createdAt        DateTime    @default(now())
+  Hearts           PostHeart[]
+  deletedAt        DateTime?
+  Followers        User[]      @relation("Follow")
+  Followings       User[]      @relation("Follow")
+  SentMessages     Message[]   @relation("sender")
+  ReceivedMessages Message[]   @relation("receiver")
 }
 
 model Post {
@@ -68,4 +70,15 @@ model Hashtag {
   title     String   @id
   createdAt DateTime @default(now())
   Posts     Post[]
+}
+
+model Message {
+  messageId  Int      @id @default(autoincrement())
+  senderId   String
+  Sender     User     @relation("sender", fields: [senderId], references: [id])
+  room       String
+  content    String
+  receiverId String
+  Receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+  createdAt  DateTime @default(now())
 }

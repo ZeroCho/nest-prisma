@@ -1,1 +1,1 @@
-export const onlineMap = {};
+export const onlineMap: { [key: string]: string } = {};
