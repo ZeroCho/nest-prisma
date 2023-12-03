@@ -30,6 +30,7 @@ npx prisma db seed
 npx prisma generate
 npx prisma migrate dev
 ```
+- migration 시 migration.sql commit하는 것 잊지 말기!!!
 
 실제로 배포한 서버에서는
 ```
