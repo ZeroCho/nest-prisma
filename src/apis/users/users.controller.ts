@@ -205,7 +205,7 @@ export class UsersController {
   @ApiOperation({summary: '현재 방 메시지 조회(roomId는 상대방 아이디)'})
   @Get(':id/rooms/:roomId')
   @ApiOkResponse({
-    description: '메시지 30개씩',
+    description: '메시지 10개씩',
     type: Message,
     isArray: true,
   })
@@ -213,7 +213,7 @@ export class UsersController {
     description: '로그인하지 않음',
   })
   @UseGuards(LoggedInGuard)
-  getRoomMessage(@User() user: UserEntity, @Query('cursor') cursor: string, @Param('roomId') id: string, @Param('roomId') roomId: string) {
+  getRoomMessage(@User() user: UserEntity, @Query('cursor') cursor: string, @Param('id') id: string, @Param('roomId') roomId: string) {
     if (id !== user.id) {
       throw new ForbiddenException();
     }

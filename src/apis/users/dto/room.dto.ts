@@ -3,9 +3,14 @@ import {User} from "../entities/user.entity";
 
 export class RoomDto {
   @ApiProperty({
-    description: '사용자'
+    description: '수신자'
   })
   Receiver: User;
+
+  @ApiProperty({
+    description: '전송자'
+  })
+  Sender: User;
 
   @ApiProperty({
     description: '방 아이디'

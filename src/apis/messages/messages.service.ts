@@ -51,6 +51,7 @@ export class MessagesService {
       },
       include: {
         Receiver: true,
+        Sender: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -61,13 +62,14 @@ export class MessagesService {
 
   async getRoomMessage(id: string, cursor: number) {
     const where: Prisma.MessageWhereInput = cursor ? {room: id, messageId: {lt: cursor}} : {room: id};
-    return this.prismaService.client.message.findMany({
+    const result = await this.prismaService.client.message.findMany({
       where,
       orderBy: {
         createdAt: 'desc',
       },
-      take: 30,
+      take: 10,
     });
+    return result.toReversed();
   }
 
   findOne(id: number) {

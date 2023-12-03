@@ -13,7 +13,7 @@ import { onlineMap } from './onlineMap';
 import {MessagesService} from "../apis/messages/messages.service";
 import {CreateMessageDto} from "../apis/messages/dto/create-message.dto";
 
-@WebSocketGateway({ namespace: /\/ws-.+/ })
+@WebSocketGateway({ namespace: 'messages', transports: ['websocket'] })
 export class EventsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
@@ -36,7 +36,7 @@ export class EventsGateway
     ids.sort();
     const receiverSocketId = onlineMap[data.receiverId];
     if (receiverSocketId) {
-      socket.to(receiverSocketId).emit('sendMessage', message);
+      socket.to(receiverSocketId).emit('receiveMessage', message);
     }
   }
 
@@ -45,6 +45,7 @@ export class EventsGateway
     @MessageBody() data: { id: number },
     @ConnectedSocket() socket: Socket,
   ) {
+    console.log('websocket login', data.id);
     onlineMap[data.id] = socket.id;
   }
 

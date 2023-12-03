@@ -1,22 +1,23 @@
-import { Inject, MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {Inject, MiddlewareConsumer, Module} from '@nestjs/common';
+import {AppController} from './app.controller';
+import {AppService} from './app.service';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { REDIS } from './redis/redis.constants';
-import { CustomPrismaModule } from 'nestjs-prisma';
-import { RedisModule } from './redis/redis.module';
-import { RedisClientType } from 'redis';
+import {ConfigModule, ConfigService} from '@nestjs/config';
+import {REDIS} from './redis/redis.constants';
+import {CustomPrismaModule} from 'nestjs-prisma';
+import {RedisModule} from './redis/redis.module';
+import {RedisClientType} from 'redis';
 import RedisStore from 'connect-redis';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { RouterModule } from '@nestjs/core';
-import { ApiModule } from './apis/api.module';
-import { extendedPrismaClient } from './prisma.extension';
-import { AuthModule } from './auth/auth.module';
-import { LoggerModule } from 'nestjs-pino';
+import {join} from 'path';
+import {ServeStaticModule} from '@nestjs/serve-static';
+import {RouterModule} from '@nestjs/core';
+import {ApiModule} from './apis/api.module';
+import {extendedPrismaClient} from './prisma.extension';
+import {AuthModule} from './auth/auth.module';
+import {LoggerModule} from 'nestjs-pino';
 import * as cookieParser from "cookie-parser";
+import {EventsModule} from "./events/events.module";
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import * as cookieParser from "cookie-parser";
         level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
         transport:
           process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty' }
+            ? {target: 'pino-pretty'}
             : undefined,
       },
     }),
@@ -46,6 +47,7 @@ import * as cookieParser from "cookie-parser";
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
     }),
+    EventsModule,
     AuthModule,
     ApiModule,
     RouterModule.register([
@@ -62,7 +64,8 @@ export class AppModule {
   constructor(
     private readonly configService: ConfigService,
     @Inject(REDIS) private readonly redis: RedisClientType,
-  ) {}
+  ) {
+  }
 
   configure(consumer: MiddlewareConsumer) {
     const store = new RedisStore({
