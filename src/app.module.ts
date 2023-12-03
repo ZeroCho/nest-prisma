@@ -14,22 +14,11 @@ import {ServeStaticModule} from '@nestjs/serve-static';
 import {RouterModule} from '@nestjs/core';
 import {ApiModule} from './apis/api.module';
 import {extendedPrismaClient} from './prisma.extension';
-import {AuthModule} from './auth/auth.module';
-import {LoggerModule} from 'nestjs-pino';
-import * as cookieParser from "cookie-parser";
+import {AuthModule} from './auth/auth.module';import * as cookieParser from "cookie-parser";
 import {EventsModule} from "./events/events.module";
 
 @Module({
   imports: [
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? {target: 'pino-pretty'}
-            : undefined,
-      },
-    }),
     ConfigModule.forRoot({
       isGlobal: true,
     }),

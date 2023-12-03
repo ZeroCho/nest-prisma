@@ -14,7 +14,6 @@ async function bootstrap() {
   });
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(new ValidationPipe());
-  app.useLogger(app.get(Logger));
 
   const config = new DocumentBuilder()
     .setTitle('Z.com API 문서')
