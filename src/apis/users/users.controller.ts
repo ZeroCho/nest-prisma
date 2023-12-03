@@ -10,7 +10,7 @@ import {
   ForbiddenException,
   UseInterceptors,
   UploadedFile,
-  UseGuards,
+  UseGuards, ParseIntPipe,
 } from '@nestjs/common';
 import {UsersService} from './users.service';
 import {CreateUserDto} from './dto/create-user.dto';
@@ -133,7 +133,7 @@ export class UsersController {
     isArray: true,
   })
   @Get(':id/posts')
-  findUserPosts(@Param('id') userId: string, @Query('cursor') cursor: number, @User() user: UserEntity) {
+  findUserPosts(@Param('id') userId: string, @Query('cursor', ParseIntPipe) cursor: number, @User() user: UserEntity) {
     return this.postsService.findUserPosts(userId, cursor, user);
   }
 

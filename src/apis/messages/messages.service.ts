@@ -69,7 +69,9 @@ export class MessagesService {
       },
       take: 10,
     });
-    return result.toReversed();
+    result.reverse();
+    return result;
+    // return result.toReverse();
   }
 
   findOne(id: number) {
