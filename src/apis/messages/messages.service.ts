@@ -19,6 +19,22 @@ export class MessagesService {
     const ids = [createMessageDto.senderId, createMessageDto.receiverId]
     ids.sort();
     return this.prismaService.client.message.create({
+      include: {
+        Receiver: {
+          select: {
+            id: true,
+            image: true,
+            nickname: true,
+          }
+        },
+        Sender: {
+          select: {
+            id: true,
+            image: true,
+            nickname: true,
+          }
+        },
+      },
       data: {
         content: createMessageDto.content,
         senderId: createMessageDto.senderId,
@@ -50,8 +66,20 @@ export class MessagesService {
         ],
       },
       include: {
-        Receiver: true,
-        Sender: true,
+        Receiver: {
+          select: {
+            id: true,
+            image: true,
+            nickname: true,
+          }
+        },
+        Sender: {
+          select: {
+            id: true,
+            image: true,
+            nickname: true,
+          }
+        },
       },
       orderBy: {
         createdAt: 'desc',
