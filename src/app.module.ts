@@ -1,22 +1,22 @@
-import { Inject, MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {Inject, MiddlewareConsumer, Module} from '@nestjs/common';
+import {AppController} from './app.controller';
+import {AppService} from './app.service';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { REDIS } from './redis/redis.constants';
-import { CustomPrismaModule } from 'nestjs-prisma';
-import { RedisModule } from './redis/redis.module';
-import { RedisClientType } from 'redis';
+import {ConfigModule, ConfigService} from '@nestjs/config';
+import {REDIS} from './redis/redis.constants';
+import {CustomPrismaModule} from 'nestjs-prisma';
+import {RedisModule} from './redis/redis.module';
+import {RedisClientType} from 'redis';
 import RedisStore from 'connect-redis';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { RouterModule } from '@nestjs/core';
-import { ApiModule } from './apis/api.module';
-import { extendedPrismaClient } from './prisma.extension';
-import { AuthModule } from './auth/auth.module';
+import {join} from 'path';
+import {ServeStaticModule} from '@nestjs/serve-static';
+import {RouterModule} from '@nestjs/core';
+import {ApiModule} from './apis/api.module';
+import {extendedPrismaClient} from './prisma.extension';
+import {AuthModule} from './auth/auth.module';
 import * as cookieParser from 'cookie-parser';
-import { EventsModule } from './events/events.module';
+import {EventsModule} from './events/events.module';
 
 @Module({
   imports: [
@@ -25,6 +25,7 @@ import { EventsModule } from './events/events.module';
     }),
     CustomPrismaModule.forRootAsync({
       name: 'PrismaService',
+      isGlobal: true,
       useFactory: () => {
         return extendedPrismaClient;
       },

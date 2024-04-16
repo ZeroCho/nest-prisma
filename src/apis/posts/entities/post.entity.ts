@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/apis/users/entities/user.entity';
+import {ApiProperty} from '@nestjs/swagger';
+import {User} from '../../users/entities/user.entity';
 import {Image} from "./image.entity";
 import {PostUserIdDto} from "../dto/user-id.dto";
 import {CountDto} from "../dto/count.dto";

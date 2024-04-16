@@ -1,10 +1,8 @@
-import { Module } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { PostsController } from './posts.controller';
-import { CustomPrismaModule } from 'nestjs-prisma';
-import { extendedPrismaClient } from '../../prisma.extension';
-import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import {Module} from '@nestjs/common';
+import {PostsService} from './posts.service';
+import {PostsController} from './posts.controller';
+import {MulterModule} from '@nestjs/platform-express';
+import {diskStorage} from 'multer';
 import * as path from 'path';
 
 @Module({
@@ -17,12 +15,6 @@ import * as path from 'path';
           done(null, path.basename(file.originalname, ext) + Date.now() + ext);
         },
       }),
-    }),
-    CustomPrismaModule.forRootAsync({
-      name: 'PrismaService',
-      useFactory: () => {
-        return extendedPrismaClient;
-      },
     }),
   ],
   controllers: [PostsController],

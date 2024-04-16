@@ -4,8 +4,6 @@ import {UpdateMessageDto} from './dto/update-message.dto';
 import {CustomPrismaService} from "nestjs-prisma";
 import {ExtendedPrismaClient} from "../../prisma.extension";
 import {Prisma} from "@prisma/client";
-import {mockProviders} from "next-auth/client/__tests__/helpers/mocks";
-import id = mockProviders.github.id;
 
 @Injectable()
 export class MessagesService {

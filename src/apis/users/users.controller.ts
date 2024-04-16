@@ -1,16 +1,17 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  Query,
   ForbiddenException,
-  UseInterceptors,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
   UploadedFile,
-  UseGuards, ParseIntPipe,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {UsersService} from './users.service';
 import {CreateUserDto} from './dto/create-user.dto';
@@ -32,7 +33,6 @@ import {FileInterceptor} from '@nestjs/platform-express';
 import {SignupResponseDto} from './dto/signup.response.dto';
 import {NotLoggedInGuard} from '../../auth/not-logged-in-guard';
 import {User} from "../../common/decorators/user.decorator";
-import {TrendsDto} from "../messages/dto/trends.dto";
 import {LoggedInGuard} from "../../auth/logged-in-guard";
 import {MessagesService} from "../messages/messages.service";
 import {RoomDto} from "./dto/room.dto";
@@ -104,7 +104,7 @@ export class UsersController {
     type: UserEntity,
   })
   @Get('followRecommends')
-  getFollowRecommends(@User() user: UserEntity) {
+  getFollowRecommends(@User() user: Pick<UserEntity, 'id'>) {
     return this.usersService.getFollowRecommends(user);
   }
 
@@ -120,7 +120,7 @@ export class UsersController {
     type: UserEntity,
   })
   @Get(':id')
-  findOne(@Param('id') id: string, @User() user: UserEntity) {
+  findOne(@Param('id') id: string, @User() user: Pick<UserEntity, 'id'>) {
     return this.usersService.findOne(id, user);
   }
 

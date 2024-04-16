@@ -50,7 +50,7 @@ export class UsersService {
     });
   }
 
-  findOne(id: string, user?: User) {
+  findOne(id: string, user?: Pick<User, 'id'>) {
     if (user) {
       return this.prismaService.client.user.findUnique({
         select: {
@@ -95,7 +95,7 @@ export class UsersService {
     });
   }
 
-  getFollowRecommends(user?: User) {
+  getFollowRecommends(user?: Pick<User, 'id'>) {
     console.log('getFollowRecommends', user);
     const where = user ? {
       Followers: {
