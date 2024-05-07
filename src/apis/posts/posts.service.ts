@@ -900,6 +900,9 @@ export class PostsService {
       },
       where,
       take: 10,
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
