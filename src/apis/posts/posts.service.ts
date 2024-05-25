@@ -356,7 +356,7 @@ export class PostsService {
     });
   }
 
-  findUserPosts(userId: string, cursor: number, user?: User) {
+  findUserPosts(userId: string, cursor = 0, user?: User) {
     const where = cursor ? {userId, postId: {lt: cursor}} : {userId};
     const xprisma = this.prismaService.client.$extends({
       result: {

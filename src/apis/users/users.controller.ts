@@ -133,7 +133,7 @@ export class UsersController {
     isArray: true,
   })
   @Get(':id/posts')
-  findUserPosts(@Param('id') userId: string, @Query('cursor', ParseIntPipe) cursor: number, @User() user: UserEntity) {
+  findUserPosts(@Param('id') userId: string, @User() user: UserEntity, @Query('cursor', ParseIntPipe) cursor?: number) {
     return this.postsService.findUserPosts(userId, cursor, user);
   }
 
