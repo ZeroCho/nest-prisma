@@ -61,6 +61,7 @@ export class PostsController {
   @ApiOkResponse({
     type: PostEntity,
   })
+  @UseGuards(LoggedInGuard)
   @UseInterceptors(FilesInterceptor('images'))
   @Post()
   create(
