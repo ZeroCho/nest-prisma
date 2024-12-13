@@ -46,7 +46,7 @@
     "express-session": "^1.17.3",
     "nestjs-pino": "^3.5.0",
     "nestjs-prisma": "^0.22.0",
-    "next-auth": "^4.24.4",
+    "next-auth": "^5.0.0-beta.25",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "pino-http": "^8.5.1",

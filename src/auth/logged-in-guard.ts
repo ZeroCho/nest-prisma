@@ -1,12 +1,33 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
 
 @Injectable()
 export class LoggedInGuard implements CanActivate {
-  canActivate(
+  async canActivate(
     context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    return request.user?.id && request.isAuthenticated();
+    console.log('canActivate with req.user', request.user?.id && request.isAuthenticated());
+    const { decode } = await import("next-auth/jwt");
+    if (request.user?.id && request.isAuthenticated()) {
+      return request.user?.id && request.isAuthenticated();
+    }
+    const nextToken = request.cookies['authjs.session-token'];
+    console.log(nextToken);
+    if (nextToken) {
+      const decoded = await decode({
+        token: nextToken,
+        secret: process.env.AUTH_SECRET,
+        salt: "authjs.session-token",
+      });
+      console.log(decoded);
+      request.user = {
+        ...decoded,
+        id: decoded.email,
+      };
+      if (decoded) {
+        return true;
+      }
+    }
+    return false;
   }
 }

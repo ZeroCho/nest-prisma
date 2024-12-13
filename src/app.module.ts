@@ -1,8 +1,8 @@
 import {Inject, MiddlewareConsumer, Module} from '@nestjs/common';
 import {AppController} from './app.controller';
 import {AppService} from './app.service';
-import * as session from 'express-session';
-import * as passport from 'passport';
+import session from 'express-session';
+import passport from 'passport';
 import {ConfigModule, ConfigService} from '@nestjs/config';
 import {REDIS} from './redis/redis.constants';
 import {CustomPrismaModule} from 'nestjs-prisma';
@@ -15,8 +15,9 @@ import {RouterModule} from '@nestjs/core';
 import {ApiModule} from './apis/api.module';
 import {extendedPrismaClient} from './prisma.extension';
 import {AuthModule} from './auth/auth.module';
-import * as cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser';
 import {EventsModule} from './events/events.module';
+import {LoggerMiddleware} from "./middlewares/logger.middleware";
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ export class AppModule {
       client: this.redis,
     });
     const middlewares = [
+      LoggerMiddleware,
       cookieParser(),
       session({
         store,

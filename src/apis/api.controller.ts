@@ -1,17 +1,7 @@
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Redirect,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-import { ApiService } from './api.service';
-import { User as UserEntity } from './users/entities/user.entity';
-import { User } from '../common/decorators/user.decorator';
+import {Controller, Get, HttpCode, Post, Redirect, Req, Res, UseGuards,} from '@nestjs/common';
+import {ApiService} from './api.service';
+import {User as UserEntity} from './users/entities/user.entity';
+import {User} from '../common/decorators/user.decorator';
 import {
   ApiBody,
   ApiExcludeEndpoint,
@@ -20,13 +10,12 @@ import {
   ApiOperation,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import {request, Request, Response} from 'express';
-import { LocalAuthGuard } from '../auth/local-auth.guard';
-import { LoginDto } from './dto/login.dto';
-import { LoginResponseDto } from './dto/login.response.dto';
-import { LoggedInGuard } from '../auth/logged-in-guard';
-import { NotLoggedInGuard } from '../auth/not-logged-in-guard';
-import {decode, getToken} from "next-auth/jwt";
+import {Request, Response} from 'express';
+import {LocalAuthGuard} from '../auth/local-auth.guard';
+import {LoginDto} from './dto/login.dto';
+import {LoginResponseDto} from './dto/login.response.dto';
+import {LoggedInGuard} from '../auth/logged-in-guard';
+import {NotLoggedInGuard} from '../auth/not-logged-in-guard';
 
 @Controller()
 export class ApiController {
@@ -96,16 +85,5 @@ export class ApiController {
   @Get('user')
   getMyInfo(@User() user: UserEntity) {
     return user || false;
-  }
-
-  @ApiOperation({
-    summary: 'next-auth 토큰 파싱',
-  })
-  @Post('decode')
-  async decode(@Req() req: Request) {
-    console.log(req.cookies['next-auth.session-token']);
-    const result = await getToken({ req, secret: 'mustkeepinsecret' });
-    console.log('result', result);
-    return result;
   }
 }

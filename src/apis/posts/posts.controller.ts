@@ -1,34 +1,34 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
   Query,
-  UseInterceptors,
   UploadedFiles,
   UseGuards,
-  NotFoundException, BadRequestException,
+  UseInterceptors,
 } from '@nestjs/common';
-import { PostsService } from './posts.service';
-import { CreatePostDto } from './dto/create-post.dto';
-import { User } from '../../common/decorators/user.decorator';
-import { CommentDto } from './dto/comment.dto';
+import {PostsService} from './posts.service';
+import {CreatePostDto} from './dto/create-post.dto';
+import {User} from '../../common/decorators/user.decorator';
+import {CommentDto} from './dto/comment.dto';
 import {
   ApiBadRequestResponse,
-  ApiBody, ApiConsumes, ApiForbiddenResponse,
+  ApiBody,
+  ApiConsumes,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Post as PostEntity } from './entities/post.entity';
-import { Image as ImageEntity } from './entities/image.entity';
-import { User as UserEntity } from '../users/entities/user.entity';
-import { FilesInterceptor } from '@nestjs/platform-express';
-import { LoggedInGuard } from '../../auth/logged-in-guard';
-import { NotFoundError } from 'rxjs';
+import {Post as PostEntity} from './entities/post.entity';
+import {Image as ImageEntity} from './entities/image.entity';
+import {User as UserEntity} from '../users/entities/user.entity';
+import {FilesInterceptor} from '@nestjs/platform-express';
+import {LoggedInGuard} from '../../auth/logged-in-guard';
 
 @ApiTags('게시글 관련')
 @Controller('posts')
@@ -61,6 +61,7 @@ export class PostsController {
   @ApiOkResponse({
     type: PostEntity,
   })
+  @UseGuards(LoggedInGuard)
   @UseInterceptors(FilesInterceptor('images'))
   @Post()
   create(
