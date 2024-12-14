@@ -24,7 +24,7 @@ export class LoggedInGuard implements CanActivate {
         ...decoded,
         id: decoded.email,
       };
-      if (decoded) {
+      if (decoded && new Date(decoded.exp * 1000) > new Date()) {
         return true;
       }
     }
