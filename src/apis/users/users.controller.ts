@@ -156,6 +156,7 @@ export class UsersController {
   @ApiForbiddenResponse({
     description: '자신은 팔로우 불가능(self_impossible)'
   })
+  @UseGuards(LoggedInGuard)
   @Post(':id/follow')
   async follow(@Param('id') id: string, @User() user: UserEntity) {
     const result = await this.usersService.follow(id, user);
@@ -172,8 +173,10 @@ export class UsersController {
   @ApiForbiddenResponse({
     description: '자신은 팔로우 불가능(self_impossible)'
   })
+  @UseGuards(LoggedInGuard)
   @Delete(':id/follow')
   async unfollow(@Param('id') id: string, @User() user: UserEntity) {
+    console.log('user', user);
     const result = await this.usersService.unfollow(id, user);
     if (result === 'self_impossible') {
       throw new ForbiddenException('self_impossible');
