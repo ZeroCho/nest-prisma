@@ -16,6 +16,7 @@ import {LoginDto} from './dto/login.dto';
 import {LoginResponseDto} from './dto/login.response.dto';
 import {LoggedInGuard} from '../auth/logged-in-guard';
 import {NotLoggedInGuard} from '../auth/not-logged-in-guard';
+import {ParseSessionTokenGuard} from "../auth/parse-session-token-guard";
 
 @Controller()
 export class ApiController {
@@ -83,6 +84,7 @@ export class ApiController {
     type: LoginResponseDto,
   })
   @Get('user')
+  @UseGuards(ParseSessionTokenGuard)
   getMyInfo(@User() user: UserEntity) {
     return user || false;
   }

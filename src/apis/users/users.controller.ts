@@ -135,6 +135,7 @@ export class UsersController {
     type: PostEntity,
     isArray: true,
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get(':id/posts')
   findUserPosts(@Param('id') userId: string, @User() user: UserEntity, @Query('cursor', ParseIntPipe) cursor?: number) {
     return this.postsService.findUserPosts(userId, cursor, user);

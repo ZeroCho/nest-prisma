@@ -29,6 +29,7 @@ import {Image as ImageEntity} from './entities/image.entity';
 import {User as UserEntity} from '../users/entities/user.entity';
 import {FilesInterceptor} from '@nestjs/platform-express';
 import {LoggedInGuard} from '../../auth/logged-in-guard';
+import {ParseSessionTokenGuard} from "../../auth/parse-session-token-guard";
 
 @ApiTags('게시글 관련')
 @Controller('posts')
@@ -117,6 +118,7 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @User() user: UserEntity) {
     return this.postsService.findOne(+id, user);
@@ -217,6 +219,7 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get(':id/comments')
   comment(@Param('id') postId: string, @User() user: UserEntity, @Query('cursor') cursor: string) {
     return this.postsService.getComments(+postId, user, +cursor);
@@ -272,9 +275,10 @@ export class PostsController {
   @ApiNotFoundResponse({
     description: '게시글 없음(no_such_post)',
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get(':id/photos/:imageId')
   getImage(
-    @User() user,
+    @User() user: UserEntity,
     @Param('id') postId: string,
     @Param('imageId') imageId: string,
   ) {
