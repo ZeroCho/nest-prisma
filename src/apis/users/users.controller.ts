@@ -121,6 +121,7 @@ export class UsersController {
     description: '유저 정보',
     type: UserEntity,
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @User() user: Pick<UserEntity, 'id'>) {
     return this.usersService.findOne(id, user);
