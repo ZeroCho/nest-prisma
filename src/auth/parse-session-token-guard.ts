@@ -1,19 +1,15 @@
 import {CanActivate, ExecutionContext, Injectable} from '@nestjs/common';
 
 @Injectable()
-export class LoggedInGuard implements CanActivate {
+export class ParseSessionTokenGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext,
   ): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log('canActivate with req.user', request.user?.id && request.isAuthenticated());
-    if (request.user?.id && request.isAuthenticated()) {
-      return request.user?.id && request.isAuthenticated();
-    }
+    const { decode } = await import("next-auth/jwt");
     const nextToken = request.cookies['authjs.session-token'];
     console.log(nextToken);
     if (nextToken) {
-      const { decode } = await import("next-auth/jwt");
       const decoded = await decode({
         token: nextToken,
         secret: process.env.AUTH_SECRET,
@@ -24,10 +20,7 @@ export class LoggedInGuard implements CanActivate {
         ...decoded,
         id: decoded.email,
       };
-      if (decoded && new Date(decoded.exp * 1000) > new Date()) {
-        return true;
-      }
     }
-    return false;
+    return true;
   }
 }

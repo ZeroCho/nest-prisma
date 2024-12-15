@@ -37,6 +37,7 @@ import {LoggedInGuard} from "../../auth/logged-in-guard";
 import {MessagesService} from "../messages/messages.service";
 import {RoomDto} from "./dto/room.dto";
 import {Message} from "../messages/entities/message.entity";
+import {ParseSessionTokenGuard} from "../../auth/parse-session-token-guard";
 
 @ApiTags('유저 관련')
 @Controller('users')
@@ -103,6 +104,7 @@ export class UsersController {
     isArray: true,
     type: UserEntity,
   })
+  @UseGuards(ParseSessionTokenGuard)
   @Get('followRecommends')
   getFollowRecommends(@User() user: Pick<UserEntity, 'id'>) {
     return this.usersService.getFollowRecommends(user);
