@@ -197,6 +197,9 @@ export class PostsService {
         },
         Parent: {
           select: {
+            postId: true,
+            content: true,
+            createdAt: true,
             User: {
               select: {
                 id: true,
@@ -204,7 +207,35 @@ export class PostsService {
                 image: true,
               }
             },
+            heartCount: true,
+            repostCount: true,
+            commentCount: true,
+            _count: true,
             Images: true,
+            Hearts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              },
+            },
+            Reposts: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            },
+            Comments: {
+              select: {
+                userId: true,
+              },
+              where: {
+                userId: user?.id,
+              }
+            }
           },
         },
         Hearts: {
