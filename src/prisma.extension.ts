@@ -9,14 +9,24 @@ export const extendedPrismaClient = prismaClient.$extends({
         args: Prisma.Exact<A, Prisma.Args<T, 'update'>>,
       ): Prisma.Result<T, A, 'update'> {
         const context = Prisma.getExtensionContext(this);
-        return (context as any).update(args);
+        return (context as any).update({
+          where: args.where,
+          data: {
+            deletedAt: new Date(),
+          },
+        });
       },
       softDeleteMany<T, A>(
         this: T,
         args: Prisma.Exact<A, Prisma.Args<T, 'updateMany'>>,
       ): Prisma.Result<T, A, 'updateMany'> {
         const context = Prisma.getExtensionContext(this);
-        return (context as any).updateMany(args);
+        return (context as any).updateMany({
+          where: args.where,
+          data: {
+            deletedAt: new Date(),
+          },
+        });
       },
     },
   },
