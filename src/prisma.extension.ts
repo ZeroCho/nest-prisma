@@ -1,28 +1,26 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import {Prisma, PrismaClient} from '@prisma/client';
 
 const prismaClient = new PrismaClient({});
 export const extendedPrismaClient = prismaClient.$extends({
   model: {
     $allModels: {
       softDelete<T, A>(
-        this: T,
-        args: Prisma.Exact<A, Prisma.Args<T, 'update'>>,
+        this: T, { where }: { where: any }
       ): Prisma.Result<T, A, 'update'> {
         const context = Prisma.getExtensionContext(this);
         return (context as any).update({
-          where: args.where,
+          where,
           data: {
             deletedAt: new Date(),
           },
         });
       },
       softDeleteMany<T, A>(
-        this: T,
-        args: Prisma.Exact<A, Prisma.Args<T, 'updateMany'>>,
+        this: T, { where }: { where: any }
       ): Prisma.Result<T, A, 'updateMany'> {
         const context = Prisma.getExtensionContext(this);
         return (context as any).updateMany({
-          where: args.where,
+          where,
           data: {
             deletedAt: new Date(),
           },
